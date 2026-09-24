@@ -4,137 +4,1404 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SmartBasket AI</title>
+
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f5f7fb;color:#172033}
-header{background:#101827;color:#fff;padding:18px}main{max-width:1000px;margin:20px auto;padding:0 14px}
-.card{background:#fff;border:1px solid #e1e6ee;border-radius:16px;padding:18px;margin-bottom:16px}
-button{padding:11px 15px;border:0;border-radius:9px;background:#1769e0;color:#fff;font-weight:700}
-button.secondary{background:#e9eef7;color:#20304b}
-input{padding:11px;border:1px solid #ccd4df;border-radius:9px;width:100%;box-sizing:border-box;margin:5px 0 10px}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
-.product{border:1px solid #e1e6ee;border-radius:10px;padding:10px}
-.store{border:1px solid #e1e6ee;border-radius:12px;padding:14px;margin-top:10px}
-.winner{border:2px solid #087f5b;background:#f0fbf6}
-.muted{color:#697586;font-size:13px}
-.hidden{display:none}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  margin:0;
+  background:#f5f7fb;
+  color:#172033
+}
+
+header{
+  background:#101827;
+  color:#fff;
+  padding:18px
+}
+
+main{
+  max-width:1000px;
+  margin:20px auto;
+  padding:0 14px
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e1e6ee;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px
+}
+
+button{
+  padding:11px 15px;
+  border:0;
+  border-radius:9px;
+  background:#1769e0;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  margin-right:6px
+}
+
+button:hover{
+  background:#0d58c7
+}
+
+button.secondary{
+  background:#e9eef7;
+  color:#20304b
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed
+}
+
+input{
+  padding:11px;
+  border:1px solid #ccd4df;
+  border-radius:9px;
+  width:100%;
+  box-sizing:border-box;
+  margin:5px 0 10px
+}
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:8px
+}
+
+.product{
+  border:1px solid #e1e6ee;
+  border-radius:10px;
+  padding:10px
+}
+
+.product input{
+  width:auto;
+  margin-right:8px
+}
+
+.store{
+  border:1px solid #e1e6ee;
+  border-radius:12px;
+  padding:14px;
+  margin-top:10px
+}
+
+.winner{
+  border:2px solid #087f5b;
+  background:#f0fbf6
+}
+
+.muted{
+  color:#697586;
+  font-size:13px
+}
+
+.error{
+  color:#b42318;
+  background:#fff1f0;
+  border:1px solid #f5c2c0;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px
+}
+
+.success{
+  color:#087f5b;
+  background:#f0fbf6;
+  border:1px solid #b7e4d3;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px
+}
+
+.hidden{
+  display:none
+}
+
+hr{
+  border:0;
+  border-top:1px solid #e1e6ee;
+  margin:12px 0
+}
 </style>
 </head>
+
 <body>
-<header><b>🛒 SmartBasket AI</b></header>
+
+<header>
+  <b>🛒 SmartBasket AI</b>
+</header>
+
 <main>
+
+<!-- LOGIN -->
 <div id="login" class="card">
-<h2>Sign in</h2>
-<p class="muted">Sign in to use your SmartBasket database from any browser.</p>
-<input id="email" type="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
-<button onclick="signin()">Sign in</button>
-<button class="secondary" onclick="signup()">Create account</button>
-<p id="authmsg"></p>
+
+  <h2>Sign in</h2>
+
+  <p class="muted">
+    Sign in to use your SmartBasket database from any browser.
+  </p>
+
+  <label>Email</label>
+  <input
+    id="email"
+    type="email"
+    placeholder="Email"
+    autocomplete="email"
+  >
+
+  <label>Password</label>
+  <input
+    id="password"
+    type="password"
+    placeholder="Password"
+    autocomplete="current-password"
+  >
+
+  <button id="signinBtn" type="button">
+    Sign in
+  </button>
+
+  <button id="signupBtn" class="secondary" type="button">
+    Create account
+  </button>
+
+  <p id="authmsg"></p>
+
 </div>
 
+
+<!-- APPLICATION -->
 <div id="app" class="hidden">
-<div class="card">
-<h2>Your Shopping List</h2>
-<p class="muted">Select the products you want to compare. The optimizer uses the latest active prices in SmartBasket.</p>
-<div id="products" class="products"></div>
-<br>
-<button onclick="optimize()">Find Best Prices</button>
-<button class="secondary" onclick="load()">Refresh</button>
-<p id="msg" class="muted"></p>
+
+  <div class="card">
+
+    <h2>Your Shopping List</h2>
+
+    <p class="muted">
+      Select the products you want to compare.
+      SmartBasket uses the latest active prices in the database.
+    </p>
+
+    <div id="products" class="products"></div>
+
+    <br>
+
+    <button id="optimizeBtn" type="button">
+      Find Best Prices
+    </button>
+
+    <button id="refreshBtn" class="secondary" type="button">
+      Refresh
+    </button>
+
+    <p id="msg" class="muted"></p>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>Results</h2>
+
+    <div id="results">
+      <p class="muted">
+        Select products and tap Find Best Prices.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h3>Trip settings</h3>
+
+    <p>
+      <b>Home:</b>
+      513 Canton Street, Stoughton, MA 02072
+    </p>
+
+    <p>
+      <b>Vehicle:</b>
+      25 MPG
+    </p>
+
+    <p class="muted">
+      Gas uses the current BJ's Stoughton regular price
+      minus the $0.10/gal member discount.
+    </p>
+
+  </div>
+
 </div>
 
-<div class="card">
-<h2>Results</h2>
-<div id="results"><p class="muted">Select products and tap Find Best Prices.</p></div>
-</div>
-
-<div class="card">
-<h3>Trip settings</h3>
-<p><b>Home:</b> 513 Canton Street, Stoughton, MA 02072</p>
-<p><b>Vehicle:</b> 25 MPG</p>
-<p class="muted">Gas uses the current BJ's Stoughton regular price minus the $0.10/gal member discount.</p>
-</div>
-</div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const URL='https://rwxsatmzflryqlgpvbzx.supabase.co';
-const KEY='sb_publishable_Zkk1oLjNQaeNqhlTWizYvA_llZiGWXn';
-const db=supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-let products=[],stores=[],prices=[],selected=new Set(),fuel=4.079;
 
-const money=n=>n==null?'—':'$'+Number(n).toFixed(2);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+<!-- IMPORTANT:
+     The package name MUST be lowercase:
+     @supabase/supabase-js
+-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE CONNECTION
+   ========================================================= */
+
+const SUPABASE_URL =
+  'https://rwxsatmzflryqlgpvbzx.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_Zkk1oLjNQaeNqhlTWizYvA_llZiGWXn';
+
+let db = null;
+
+
+/* =========================================================
+   INITIALIZE SUPABASE
+   ========================================================= */
+
+try {
+
+  if (
+    !window.supabase ||
+    !window.supabase.createClient
+  ) {
+
+    throw new Error(
+      'Supabase JavaScript library did not load.'
+    );
+
+  }
+
+  db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    }
+  );
+
+}
+catch(error){
+
+  console.error(
+    'Supabase initialization error:',
+    error
+  );
+
+  document.getElementById('authmsg').innerHTML =
+    '<div class="error">' +
+    'SmartBasket could not load the login service. ' +
+    'Please refresh the page.' +
+    '</div>';
+
+}
+
+
+/* =========================================================
+   APPLICATION VARIABLES
+   ========================================================= */
+
+let products = [];
+let stores = [];
+let prices = [];
+let selected = new Set();
+
+let fuel = 4.079;
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+const money = n => {
+
+  if(n == null || Number.isNaN(Number(n))){
+    return '—';
+  }
+
+  return '$' + Number(n).toFixed(2);
+
+};
+
+
+const esc = s => {
+
+  return String(s ?? '').replace(
+    /[&<>"']/g,
+    c => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[c])
+  );
+
+};
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
 async function signin(){
- const {error}=await db.auth.signInWithPassword({email:email.value,password:password.value});
- authmsg.textContent=error?error.message:'';
- if(!error)start();
+
+  const msg =
+    document.getElementById('authmsg');
+
+  const emailInput =
+    document.getElementById('email');
+
+  const passwordInput =
+    document.getElementById('password');
+
+  const button =
+    document.getElementById('signinBtn');
+
+
+  if(!db){
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'The Supabase login service is not loaded. ' +
+      'Please refresh the page.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  const email =
+    emailInput.value.trim();
+
+  const password =
+    passwordInput.value;
+
+
+  if(!email){
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'Please enter your email address.' +
+      '</div>';
+
+    emailInput.focus();
+
+    return;
+
+  }
+
+
+  if(!password){
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'Please enter your password.' +
+      '</div>';
+
+    passwordInput.focus();
+
+    return;
+
+  }
+
+
+  button.disabled = true;
+
+  button.textContent =
+    'Signing in...';
+
+  msg.innerHTML =
+    '<div class="muted">Connecting to SmartBasket...</div>';
+
+
+  try{
+
+    const response =
+      await db.auth.signInWithPassword({
+        email:email,
+        password:password
+      });
+
+
+    if(response.error){
+
+      console.error(
+        'Supabase login error:',
+        response.error
+      );
+
+      msg.innerHTML =
+        '<div class="error">' +
+        esc(response.error.message) +
+        '</div>';
+
+      button.disabled = false;
+
+      button.textContent =
+        'Sign in';
+
+      return;
+
+    }
+
+
+    msg.innerHTML =
+      '<div class="success">' +
+      'Login successful.' +
+      '</div>';
+
+
+    await start();
+
+  }
+  catch(error){
+
+    console.error(
+      'Login exception:',
+      error
+    );
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'Login error: ' +
+      esc(error?.message || error) +
+      '</div>';
+
+  }
+
+
+  button.disabled = false;
+
+  button.textContent =
+    'Sign in';
+
 }
+
+
+/* =========================================================
+   CREATE ACCOUNT
+   ========================================================= */
+
 async function signup(){
- const {error}=await db.auth.signUp({email:email.value,password:password.value});
- authmsg.textContent=error?error.message:'Account created. Check your email if confirmation is required.';
+
+  const msg =
+    document.getElementById('authmsg');
+
+  const email =
+    document.getElementById('email').value.trim();
+
+  const password =
+    document.getElementById('password').value;
+
+
+  if(!db){
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'The Supabase login service is not loaded.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  if(!email || !password){
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'Enter an email and password first.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await db.auth.signUp({
+        email:email,
+        password:password
+      });
+
+
+    if(response.error){
+
+      msg.innerHTML =
+        '<div class="error">' +
+        esc(response.error.message) +
+        '</div>';
+
+      return;
+
+    }
+
+
+    msg.innerHTML =
+      '<div class="success">' +
+      'Account created. ' +
+      'Check your email if confirmation is required.' +
+      '</div>';
+
+  }
+  catch(error){
+
+    console.error(
+      'Signup error:',
+      error
+    );
+
+    msg.innerHTML =
+      '<div class="error">' +
+      esc(error?.message || error) +
+      '</div>';
+
+  }
+
 }
+
+
+/* =========================================================
+   START APPLICATION
+   ========================================================= */
+
 async function start(){
- login.classList.add('hidden');app.classList.remove('hidden');await load();
+
+  document
+    .getElementById('login')
+    .classList
+    .add('hidden');
+
+  document
+    .getElementById('app')
+    .classList
+    .remove('hidden');
+
+
+  await load();
+
 }
+
+
+/* =========================================================
+   LOAD DATABASE
+   ========================================================= */
+
 async function load(){
- const [p,s,sp,f]=await Promise.all([
-  db.from('products').select('*').order('name'),
-  db.from('stores').select('*').eq('is_active',true).order('name'),
-  db.from('store_products').select('*').eq('is_active',true),
-  db.from('fuel_prices').select('*').eq('store_id',2).eq('fuel_type','regular').order('observed_at',{ascending:false}).limit(1)
- ]);
- if(p.error||s.error||sp.error){msg.textContent='Could not load SmartBasket data. Check Supabase permissions.';return}
- products=p.data||[];stores=s.data||[];prices=sp.data||[];
- if(f.data?.[0])fuel=Number(f.data[0].price_per_gallon);
- document.getElementById('products').innerHTML=products.map(x=>
-  `<label class="product"><input type="checkbox" onchange="toggle(${x.id})"> <b>${esc(x.name)}</b><br><span class="muted">${esc(x.category||'')}</span></label>`).join('');
+
+  const msg =
+    document.getElementById('msg');
+
+
+  msg.textContent =
+    'Loading SmartBasket data...';
+
+
+  try{
+
+    const [
+      p,
+      s,
+      sp,
+      f
+    ] = await Promise.all([
+
+      db
+        .from('products')
+        .select('*')
+        .order('name'),
+
+      db
+        .from('stores')
+        .select('*')
+        .eq('is_active',true)
+        .order('name'),
+
+      db
+        .from('store_products')
+        .select('*')
+        .eq('is_active',true),
+
+      db
+        .from('fuel_prices')
+        .select('*')
+        .eq('store_id',2)
+        .eq('fuel_type','regular')
+        .order('observed_at',{
+          ascending:false
+        })
+        .limit(1)
+
+    ]);
+
+
+    if(p.error){
+
+      throw new Error(
+        'Products: ' + p.error.message
+      );
+
+    }
+
+
+    if(s.error){
+
+      throw new Error(
+        'Stores: ' + s.error.message
+      );
+
+    }
+
+
+    if(sp.error){
+
+      throw new Error(
+        'Prices: ' + sp.error.message
+      );
+
+    }
+
+
+    if(f.error){
+
+      console.warn(
+        'Fuel price error:',
+        f.error
+      );
+
+    }
+
+
+    products =
+      p.data || [];
+
+    stores =
+      s.data || [];
+
+    prices =
+      sp.data || [];
+
+
+    if(
+      f.data &&
+      f.data.length > 0
+    ){
+
+      fuel =
+        Number(
+          f.data[0].price_per_gallon
+        );
+
+    }
+
+
+    document
+      .getElementById('products')
+      .innerHTML =
+
+      products.map(product => {
+
+        return `
+          <label class="product">
+
+            <input
+              type="checkbox"
+              data-product-id="${product.id}"
+            >
+
+            <b>
+              ${esc(product.name)}
+            </b>
+
+            <br>
+
+            <span class="muted">
+              ${esc(product.category || '')}
+            </span>
+
+          </label>
+        `;
+
+      }).join('');
+
+
+    document
+      .querySelectorAll(
+        '[data-product-id]'
+      )
+      .forEach(checkbox => {
+
+        checkbox.addEventListener(
+          'change',
+          function(){
+
+            toggle(
+              Number(
+                this.dataset.productId
+              )
+            );
+
+          }
+        );
+
+      });
+
+
+    msg.textContent =
+      products.length +
+      ' products loaded from SmartBasket.';
+
+
+  }
+  catch(error){
+
+    console.error(
+      'Database loading error:',
+      error
+    );
+
+    msg.innerHTML =
+      '<div class="error">' +
+      esc(error?.message || error) +
+      '</div>';
+
+  }
+
 }
-function toggle(id){selected.has(id)?selected.delete(id):selected.add(id)}
+
+
+/* =========================================================
+   PRODUCT SELECTION
+   ========================================================= */
+
+function toggle(id){
+
+  if(selected.has(id)){
+
+    selected.delete(id);
+
+  }
+  else{
+
+    selected.add(id);
+
+  }
+
+}
+
+
+/* =========================================================
+   CALCULATE STORE ROUTE
+   ========================================================= */
 
 async function route(st){
- try{
-  const session=(await db.auth.getSession()).data.session;
-  const r=await fetch(URL+'/functions/v1/calculate-store-routes',{
-   method:'POST',
-   headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},
-   body:JSON.stringify({home_address:'513 Canton Street, Stoughton, MA 02072',
-    stores:[{id:String(st.id),latitude:Number(st.latitude),longitude:Number(st.longitude)}]})
-  });
-  if(r.ok){const j=await r.json();const x=j.results?.[0]||j.routes?.[0];return x?Number(x.round_trip_miles??x.miles??x.distance_miles):null}
- }catch(e){}
- return null;
+
+  try{
+
+    const sessionResponse =
+      await db.auth.getSession();
+
+    const session =
+      sessionResponse.data.session;
+
+
+    if(!session){
+
+      console.error(
+        'No authenticated session.'
+      );
+
+      return null;
+
+    }
+
+
+    const response =
+      await fetch(
+        SUPABASE_URL +
+        '/functions/v1/calculate-store-routes',
+        {
+          method:'POST',
+
+          headers:{
+            'Authorization':
+              'Bearer ' +
+              session.access_token,
+
+            'Content-Type':
+              'application/json'
+          },
+
+          body:JSON.stringify({
+
+            home_address:
+              '513 Canton Street, Stoughton, MA 02072',
+
+            stores:[{
+
+              id:String(st.id),
+
+              latitude:
+                Number(st.latitude),
+
+              longitude:
+                Number(st.longitude)
+
+            }]
+
+          })
+
+        }
+      );
+
+
+    if(!response.ok){
+
+      console.error(
+        'Route request failed:',
+        response.status
+      );
+
+      return null;
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    const result =
+      data.results?.[0] ||
+      data.routes?.[0];
+
+
+    if(!result){
+
+      return null;
+
+    }
+
+
+    return Number(
+      result.round_trip_miles ??
+      result.miles ??
+      result.distance_miles
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      'Route error:',
+      error
+    );
+
+    return null;
+
+  }
+
 }
 
+
+/* =========================================================
+   OPTIMIZE SHOPPING
+   ========================================================= */
+
 async function optimize(){
- if(!selected.size){msg.textContent='Select at least one product first.';return}
- results.innerHTML='<p>Calculating groceries, routes and gas...</p>';
- const chosen=products.filter(p=>selected.has(p.id)), out=[];
- for(const st of stores){
-  const rows=chosen.map(p=>prices.find(x=>Number(x.product_id)==p.id&&Number(x.store_id)==st.id));
-  const complete=rows.every(Boolean);
-  let subtotal=complete?rows.reduce((a,r)=>a+Number(r.current_price||0),0):null;
-  let miles=complete?await route(st):null;
-  let gas=miles==null?null:(miles/25)*(fuel-.10);
-  out.push({st,rows,complete,miles,gas,total:subtotal==null||gas==null?null:subtotal+gas,subtotal});
- }
- const viable=out.filter(x=>x.complete&&x.total!=null).sort((a,b)=>a.total-b.total);
- const winner=viable[0];
- results.innerHTML=winner?
- `<div class="winner store"><b>Lowest complete basket including gas: ${esc(winner.st.name)}</b><br>
- Food ${money(winner.subtotal)} + gas ${money(winner.gas)} = <b>${money(winner.total)}</b></div>`:
- '<div class="store"><b>No complete store is currently available with a verified route.</b></div>';
- results.innerHTML+=out.map(x=>{
-  const missing=chosen.filter((p,i)=>!x.rows[i]).map(p=>`<div class="muted">Price still needed: ${esc(p.name)}</div>`).join('');
-  return `<div class="store"><h3>${esc(x.st.name)}</h3>
-  ${x.rows.map((r,i)=>r?`<div>${esc(chosen[i].name)} — ${money(r.current_price)} ${r.package_quantity?esc(r.package_quantity+' '+r.package_unit):''}</div>`:`<div class="muted">Price still needed: ${esc(chosen[i].name)}</div>`).join('')}
-  ${x.complete?`<hr><div>Groceries: <b>${money(x.subtotal)}</b></div><div>Round trip: ${x.miles==null?'—':x.miles.toFixed(1)+' miles'}</div><div>Gas: ${money(x.gas)}</div><div>Total trip: <b>${money(x.total)}</b></div>`:'<p class="muted">Incomplete basket — not eligible to win.</p>'}
-  ${winner&&x.total!=null&&x.st.id!=winner.st.id?`<p class="muted">${money(x.total-winner.total)} more than the lowest complete basket.</p>`:''}</div>`;
- }).join('');
+
+  const msg =
+    document.getElementById('msg');
+
+  const results =
+    document.getElementById('results');
+
+  const button =
+    document.getElementById('optimizeBtn');
+
+
+  if(!selected.size){
+
+    msg.innerHTML =
+      '<div class="error">' +
+      'Select at least one product first.' +
+      '</div>';
+
+    return;
+
+  }
+
+
+  button.disabled = true;
+
+  button.textContent =
+    'Calculating...';
+
+
+  results.innerHTML =
+    '<p>Calculating groceries, routes and gas...</p>';
+
+
+  const chosen =
+    products.filter(
+      p => selected.has(p.id)
+    );
+
+
+  const output = [];
+
+
+  for(const store of stores){
+
+    const rows =
+      chosen.map(product =>
+
+        prices.find(price =>
+
+          Number(price.product_id) ===
+          Number(product.id)
+
+          &&
+
+          Number(price.store_id) ===
+          Number(store.id)
+
+        )
+
+      );
+
+
+    const complete =
+      rows.every(Boolean);
+
+
+    let subtotal = null;
+
+
+    if(complete){
+
+      subtotal =
+        rows.reduce(
+          (sum,row) =>
+            sum +
+            Number(row.current_price || 0),
+          0
+        );
+
+    }
+
+
+    let miles = null;
+
+
+    if(complete){
+
+      miles =
+        await route(store);
+
+    }
+
+
+    let gas = null;
+
+
+    if(miles != null){
+
+      gas =
+        (miles / 25) *
+        (fuel - 0.10);
+
+    }
+
+
+    let total = null;
+
+
+    if(
+      subtotal != null &&
+      gas != null
+    ){
+
+      total =
+        subtotal + gas;
+
+    }
+
+
+    output.push({
+
+      store,
+      rows,
+      complete,
+      miles,
+      gas,
+      total,
+      subtotal
+
+    });
+
+  }
+
+
+  const viable =
+    output
+      .filter(
+        x =>
+          x.complete &&
+          x.total != null
+      )
+      .sort(
+        (a,b) =>
+          a.total - b.total
+      );
+
+
+  const winner =
+    viable[0];
+
+
+  if(winner){
+
+    results.innerHTML = `
+
+      <div class="winner store">
+
+        <h3>
+          Lowest complete basket including gas
+        </h3>
+
+        <b>
+          ${esc(winner.store.name)}
+        </b>
+
+        <br><br>
+
+        Food:
+        <b>${money(winner.subtotal)}</b>
+
+        <br>
+
+        Gas:
+        <b>${money(winner.gas)}</b>
+
+        <br><br>
+
+        Total trip cost:
+        <b>${money(winner.total)}</b>
+
+      </div>
+
+    `;
+
+  }
+  else{
+
+    results.innerHTML = `
+
+      <div class="store">
+
+        <b>
+          No complete store is currently
+          available with a verified route.
+        </b>
+
+      </div>
+
+    `;
+
+  }
+
+
+  results.innerHTML +=
+
+    output.map(item => {
+
+      const missing =
+        chosen
+          .filter(
+            (product,index) =>
+              !item.rows[index]
+          );
+
+
+      return `
+
+        <div class="store">
+
+          <h3>
+            ${esc(item.store.name)}
+          </h3>
+
+
+          ${chosen.map(
+            (product,index) => {
+
+              const row =
+                item.rows[index];
+
+
+              if(!row){
+
+                return `
+
+                  <div class="muted">
+
+                    Price still needed:
+                    ${esc(product.name)}
+
+                  </div>
+
+                `;
+
+              }
+
+
+              const packageInfo =
+                row.package_quantity
+                  ? `${esc(
+                      row.package_quantity +
+                      ' ' +
+                      (row.package_unit || '')
+                    )}`
+                  : '';
+
+
+              return `
+
+                <div>
+
+                  ${esc(product.name)}
+                  —
+                  ${money(row.current_price)}
+
+                  ${packageInfo
+                    ? ` (${packageInfo})`
+                    : ''}
+
+                </div>
+
+              `;
+
+            }
+
+          ).join('')}
+
+
+          ${
+            item.complete
+
+            ?
+
+            `
+
+              <hr>
+
+              <div>
+                Groceries:
+                <b>
+                  ${money(item.subtotal)}
+                </b>
+              </div>
+
+              <div>
+                Round trip:
+                ${
+                  item.miles == null
+                    ? '—'
+                    : item.miles.toFixed(1) +
+                      ' miles'
+                }
+              </div>
+
+              <div>
+                Gas:
+                <b>
+                  ${money(item.gas)}
+                </b>
+              </div>
+
+              <div>
+                Total trip:
+                <b>
+                  ${money(item.total)}
+                </b>
+              </div>
+
+              ${
+                winner &&
+                item.total != null &&
+                item.store.id !== winner.store.id
+
+                ?
+
+                `<p class="muted">
+                  ${money(
+                    item.total -
+                    winner.total
+                  )}
+                  more than the lowest
+                  complete basket.
+                </p>`
+
+                :
+
+                ''
+              }
+
+            `
+
+            :
+
+            `
+
+              <p class="muted">
+                Incomplete basket —
+                not eligible to win.
+              </p>
+
+            `
+
+          }
+
+        </div>
+
+      `;
+
+    }).join('');
+
+
+  msg.textContent =
+    'Comparison complete.';
+
+
+  button.disabled = false;
+
+  button.textContent =
+    'Find Best Prices';
+
 }
-db.auth.getSession().then(({data})=>{if(data.session)start()});
+
+
+/* =========================================================
+   BUTTON EVENTS
+   ========================================================= */
+
+document
+  .getElementById('signinBtn')
+  .addEventListener(
+    'click',
+    signin
+  );
+
+
+document
+  .getElementById('signupBtn')
+  .addEventListener(
+    'click',
+    signup
+  );
+
+
+document
+  .getElementById('optimizeBtn')
+  .addEventListener(
+    'click',
+    optimize
+  );
+
+
+document
+  .getElementById('refreshBtn')
+  .addEventListener(
+    'click',
+    load
+  );
+
+
+/* =========================================================
+   ENTER KEY LOGIN
+   ========================================================= */
+
+document
+  .getElementById('password')
+  .addEventListener(
+    'keydown',
+    function(event){
+
+      if(event.key === 'Enter'){
+
+        signin();
+
+      }
+
+    }
+  );
+
+
+/* =========================================================
+   AUTOMATIC SESSION CHECK
+   ========================================================= */
+
+async function checkExistingSession(){
+
+  if(!db){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await db.auth.getSession();
+
+
+    if(
+      response.data &&
+      response.data.session
+    ){
+
+      await start();
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      'Session check error:',
+      error
+    );
+
+  }
+
+}
+
+
+checkExistingSession();
+
 </script>
+
 </body>
 </html>
