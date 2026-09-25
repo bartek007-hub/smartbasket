@@ -1,60 +1,87 @@
 <!doctype html>
 <html lang="en">
+
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+>
+
 <title>SmartBasket AI</title>
 
 <style>
+
+*{
+  box-sizing:border-box;
+}
+
 body{
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
   margin:0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
   background:#f5f7fb;
-  color:#172033
+  color:#172033;
 }
 
 header{
   background:#101827;
-  color:#fff;
-  padding:18px
+  color:white;
+  padding:18px 22px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+header b{
+  font-size:20px;
 }
 
 main{
   max-width:1100px;
-  margin:20px auto;
-  padding:0 14px
+  margin:22px auto;
+  padding:0 14px;
 }
 
 .card{
-  background:#fff;
+  background:white;
   border:1px solid #e1e6ee;
   border-radius:16px;
-  padding:18px;
-  margin-bottom:16px
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:0 2px 7px rgba(0,0,0,.025);
 }
 
 button{
-  padding:11px 15px;
+  padding:11px 16px;
   border:0;
   border-radius:9px;
   background:#1769e0;
-  color:#fff;
+  color:white;
   font-weight:700;
   cursor:pointer;
-  margin-right:6px
+  margin-right:6px;
+  margin-bottom:6px;
 }
 
 button:hover{
-  opacity:.92
+  opacity:.92;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
 }
 
 button.secondary{
   background:#e9eef7;
-  color:#20304b
-}
-
-button.danger{
-  background:#c0392b
+  color:#20304b;
 }
 
 input{
@@ -62,164 +89,175 @@ input{
   border:1px solid #ccd4df;
   border-radius:9px;
   width:100%;
-  box-sizing:border-box;
-  margin:5px 0 10px
-}
-
-textarea{
-  padding:11px;
-  border:1px solid #ccd4df;
-  border-radius:9px;
-  width:100%;
-  box-sizing:border-box;
   margin:5px 0 10px;
-  resize:vertical;
-  font-family:inherit
+  font-size:14px;
 }
 
 .products{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:8px
+  grid-template-columns:
+    repeat(auto-fit,minmax(240px,1fr));
+  gap:9px;
 }
 
 .product{
   border:1px solid #e1e6ee;
-  border-radius:10px;
-  padding:10px;
-  background:#fff
+  border-radius:11px;
+  padding:12px;
+  background:#fff;
 }
 
 .product:hover{
-  background:#f8fbff
+  background:#f8fbff;
+}
+
+.product input{
+  width:auto;
+  margin-right:7px;
 }
 
 .store{
   border:1px solid #e1e6ee;
   border-radius:12px;
-  padding:14px;
-  margin-top:10px
+  padding:15px;
+  margin-top:11px;
 }
 
 .winner{
   border:2px solid #087f5b;
-  background:#f0fbf6
+  background:#f0fbf6;
 }
 
 .muted{
   color:#697586;
-  font-size:13px
+  font-size:13px;
 }
 
 .hidden{
-  display:none
-}
-
-.price{
-  font-weight:700
-}
-
-.missing{
-  color:#a15c00
+  display:none !important;
 }
 
 .good{
   color:#087f5b;
-  font-weight:700
+  font-weight:700;
+}
+
+.missing{
+  color:#a15c00;
+}
+
+.error{
+  color:#b42318;
+  font-weight:600;
+}
+
+.success{
+  color:#087f5b;
+  font-weight:600;
 }
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:10px
+  grid-template-columns:
+    repeat(auto-fit,minmax(180px,1fr));
+  gap:10px;
 }
 
 .pill{
   display:inline-block;
   background:#eef3fa;
-  padding:4px 8px;
+  padding:4px 9px;
   border-radius:20px;
   font-size:12px;
-  margin:2px
+  margin:2px;
 }
 
 .add-product-box{
   margin-top:18px;
-  padding:14px;
+  padding:15px;
   border:1px solid #e1e6ee;
   border-radius:12px;
-  background:#fafcff
+  background:#fafcff;
 }
 
 .add-product-row{
   display:flex;
   gap:8px;
-  align-items:center
+  align-items:center;
 }
 
 .add-product-row input{
   margin:0;
-  flex:1
+  flex:1;
 }
 
 .add-product-row button{
+  margin:0;
   white-space:nowrap;
-  margin:0
-}
-
-.custom-label{
-  color:#1769e0;
-  font-size:12px;
-  font-weight:700
 }
 
 .status{
   padding:10px 12px;
   border-radius:9px;
   background:#f3f6fa;
-  margin-top:10px
+  margin-top:10px;
 }
 
-.error{
-  color:#b42318;
-  font-weight:600
-}
-
-.success{
-  color:#087f5b;
-  font-weight:600
+.last-update{
+  font-size:12px;
+  color:#697586;
+  margin-top:7px;
 }
 
 .login-actions{
   display:flex;
   gap:6px;
-  flex-wrap:wrap
+  flex-wrap:wrap;
 }
 
 @media(max-width:600px){
+
   .add-product-row{
     flex-direction:column;
-    align-items:stretch
+    align-items:stretch;
   }
 
   .add-product-row button{
-    width:100%
+    width:100%;
   }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <header>
-  <b>🛒 SmartBasket AI</b>
+
+  <b>
+    🛒 SmartBasket AI
+  </b>
+
 </header>
+
 
 <main>
 
-<div id="login" class="card">
 
-  <h2>Sign in</h2>
+<!-- LOGIN -->
+
+<div
+  id="login"
+  class="card"
+>
+
+  <h2>
+    Sign in
+  </h2>
 
   <p class="muted">
     Sign in to use your SmartBasket database.
@@ -250,7 +288,6 @@ textarea{
     </button>
 
     <button
-      id="signupBtn"
       class="secondary"
       type="button"
       onclick="signup()"
@@ -265,39 +302,65 @@ textarea{
 </div>
 
 
-<div id="app" class="hidden">
+<!-- APPLICATION -->
+
+<div
+  id="app"
+  class="hidden"
+>
+
+
+  <!-- SHOPPING LIST -->
 
   <div class="card">
 
-    <h2>Your Shopping List</h2>
+    <h2>
+      Your Shopping List
+    </h2>
 
     <p class="muted">
-      SmartBasket compares prices across all tracked stores.
-      Products with missing prices remain on the list and are shown as missing.
+      SmartBasket compares current prices across
+      all tracked stores.
     </p>
 
-    <div id="products" class="products"></div>
+
+    <div
+      id="products"
+      class="products"
+    ></div>
+
+
+    <!-- ADD PRODUCT -->
 
     <div class="add-product-box">
 
-      <h3>Add Product to Shopping List</h3>
+      <h3>
+        Add Product to Shopping List
+      </h3>
 
       <p class="muted">
-        Add something that is not currently in the SmartBasket list.
-        It will be saved to your SmartBasket database and SmartBasket
-        will immediately search the tracked stores for a price.
+        Add a product that is not currently
+        in the database. SmartBasket will save
+        it and immediately search the tracked stores.
       </p>
+
 
       <div class="add-product-row">
 
         <input
           id="newProduct"
           type="text"
-          placeholder="Example: olive oil, bananas, turkey breast..."
-          onkeydown="if(event.key==='Enter'){event.preventDefault();addProduct();}"
+          placeholder="Example: bananas, olive oil, chicken breast..."
+          onkeydown="
+            if(event.key==='Enter'){
+              event.preventDefault();
+              addProduct();
+            }
+          "
         >
 
         <button
+          id="addProductBtn"
           type="button"
           onclick="addProduct()"
         >
@@ -306,40 +369,66 @@ textarea{
 
       </div>
 
-      <p id="addMsg" class="muted"></p>
+
+      <p
+        id="addMsg"
+        class="muted"
+      ></p>
 
     </div>
 
+
     <br>
 
+
+    <!-- BUTTONS -->
+
     <button
+      id="findBtn"
       type="button"
       onclick="optimize()"
     >
       Find Best Shopping Plan
     </button>
 
+
     <button
+      id="refreshBtn"
       class="secondary"
       type="button"
-      onclick="load()"
+      onclick="refreshPrices()"
     >
-      Refresh Prices
+      🔄 Refresh Prices
     </button>
 
-    <p id="msg" class="muted"></p>
+
+    <p
+      id="msg"
+      class="muted"
+    ></p>
+
+
+    <div
+      id="lastUpdate"
+      class="last-update"
+    ></div>
 
   </div>
 
 
+  <!-- RESULTS -->
+
   <div class="card">
 
-    <h2>Results</h2>
+    <h2>
+      Results
+    </h2>
 
     <div id="results">
 
       <p class="muted">
-        Select products and tap Find Best Shopping Plan.
+        Select products and click
+        Find Best Shopping Plan.
       </p>
 
     </div>
@@ -347,13 +436,18 @@ textarea{
   </div>
 
 
+  <!-- SETTINGS -->
+
   <div class="card">
 
-    <h3>Trip settings</h3>
+    <h3>
+      Trip Settings
+    </h3>
 
     <p>
       <b>Home:</b>
-      513 Canton Street, Stoughton, MA 02072
+      513 Canton Street,
+      Stoughton, MA 02072
     </p>
 
     <p>
@@ -362,20 +456,30 @@ textarea{
     </p>
 
     <p class="muted">
-      Gas uses the latest BJ's Stoughton regular price
-      minus the $0.10/gal member discount.
+      Gas uses the latest BJ's Stoughton
+      regular price minus the $0.10/gal
+      member discount.
     </p>
 
   </div>
+
 
 </div>
 
 </main>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
 
 <script>
+
+
+/* ============================================================
+   SUPABASE
+============================================================ */
 
 const SUPABASE_URL =
   'https://rwxsatmzflryqlgpvbzx.supabase.co';
@@ -383,18 +487,23 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   'sb_publishable_Zkk1oLjNQaeNqhlTWizYvA_llZiGWXn';
 
-const db = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY,
-  {
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true
+const db =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
     }
-  }
-);
+  );
 
+
+/* ============================================================
+   SETTINGS
+============================================================ */
 
 const HOME = {
   lat:42.1298441,
@@ -402,68 +511,113 @@ const HOME = {
 };
 
 const MPG = 25;
+
 const CLUSTER_MILES = 0.5;
 
 
+/* ============================================================
+   APPLICATION DATA
+============================================================ */
+
 let products = [];
+
 let stores = [];
+
 let prices = [];
+
 let selected = new Set();
+
 let fuel = null;
 
+let latestDatabaseUpdate = null;
+
+
+/* ============================================================
+   HELPERS
+============================================================ */
 
 function el(id){
+
   return document.getElementById(id);
+
 }
 
 
-const money = n => {
+function money(value){
 
   if(
-    n === null ||
-    n === undefined ||
-    isNaN(Number(n))
+    value === null ||
+    value === undefined ||
+    isNaN(Number(value))
   ){
+
     return '—';
+
   }
 
-  return '$' + Number(n).toFixed(2);
+  return '$' +
+    Number(value).toFixed(2);
 
-};
+}
 
 
-function esc(s){
+function esc(value){
 
-  return String(s ?? '')
-    .replace(/[&<>"']/g,c => ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#39;'
-    }[c]));
+  return String(value ?? '')
+    .replace(
+      /[&<>"']/g,
+      c => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[c])
+    );
 
 }
 
 
 function hav(a,b){
 
-  const R = 3958.7613;
-  const r = Math.PI / 180;
+  const R =
+    3958.7613;
+
+  const r =
+    Math.PI / 180;
 
   const dLat =
-    (Number(b.latitude) - Number(a.latitude)) * r;
+    (
+      Number(b.latitude) -
+      Number(a.latitude)
+    ) * r;
 
   const dLon =
-    (Number(b.longitude) - Number(a.longitude)) * r;
+    (
+      Number(b.longitude) -
+      Number(a.longitude)
+    ) * r;
 
   const x =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos(Number(a.latitude) * r) *
-    Math.cos(Number(b.latitude) * r) *
+
+    Math.cos(
+      Number(a.latitude) * r
+    ) *
+
+    Math.cos(
+      Number(b.latitude) * r
+    ) *
+
     Math.sin(dLon / 2) ** 2;
 
-  return 2 * R * Math.asin(Math.sqrt(x));
+  return (
+    2 *
+    R *
+    Math.asin(
+      Math.sqrt(x)
+    )
+  );
 
 }
 
@@ -474,93 +628,101 @@ function hav(a,b){
 
 async function signin(){
 
-  const emailEl = el('email');
-  const passwordEl = el('password');
-  const authmsgEl = el('authmsg');
-  const signinBtn = el('signinBtn');
+  const email =
+    el('email')
+      .value
+      .trim();
 
-  const emailValue =
-    emailEl.value.trim();
+  const password =
+    el('password')
+      .value;
 
-  const passwordValue =
-    passwordEl.value;
+  const msg =
+    el('authmsg');
 
-  authmsgEl.className = '';
+  const button =
+    el('signinBtn');
 
-  if(!emailValue){
 
-    authmsgEl.textContent =
-      'Please enter your email address.';
+  if(!email){
 
-    authmsgEl.className =
+    msg.textContent =
+      'Please enter your email.';
+
+    msg.className =
       'error';
 
     return;
+
   }
 
-  if(!passwordValue){
 
-    authmsgEl.textContent =
+  if(!password){
+
+    msg.textContent =
       'Please enter your password.';
 
-    authmsgEl.className =
+    msg.className =
       'error';
 
     return;
+
   }
 
-  signinBtn.disabled = true;
-  signinBtn.textContent = 'Signing in...';
+
+  button.disabled =
+    true;
+
+  button.textContent =
+    'Signing in...';
+
 
   try{
 
-    const {data,error} =
-      await db.auth.signInWithPassword({
-        email:emailValue,
-        password:passwordValue
-      });
+    const {
+      data,
+      error
+    } =
+      await db.auth
+        .signInWithPassword({
+          email,
+          password
+        });
 
-    if(error){
 
-      authmsgEl.textContent =
-        error.message;
+    if(error)
+      throw error;
 
-      authmsgEl.className =
-        'error';
 
-      return;
-    }
+    if(!data.session)
+      throw new Error(
+        'No login session was returned.'
+      );
 
-    if(!data || !data.session){
 
-      authmsgEl.textContent =
-        'Login succeeded, but no session was returned.';
-
-      authmsgEl.className =
-        'error';
-
-      return;
-    }
-
-    authmsgEl.textContent = '';
+    msg.textContent = '';
 
     await start();
+
 
   }catch(error){
 
     console.error(error);
 
-    authmsgEl.textContent =
-      'Login error: ' +
-      (error.message || error);
+    msg.textContent =
+      error.message ||
+      String(error);
 
-    authmsgEl.className =
+    msg.className =
       'error';
 
   }finally{
 
-    signinBtn.disabled = false;
-    signinBtn.textContent = 'Sign in';
+    button.disabled =
+      false;
+
+    button.textContent =
+      'Sign in';
 
   }
 
@@ -568,109 +730,91 @@ async function signin(){
 
 
 /* ============================================================
-   CREATE ACCOUNT
+   SIGNUP
 ============================================================ */
 
 async function signup(){
 
-  const emailValue =
-    el('email').value.trim();
+  const email =
+    el('email')
+      .value
+      .trim();
 
-  const passwordValue =
-    el('password').value;
+  const password =
+    el('password')
+      .value;
 
-  const authmsgEl =
+  const msg =
     el('authmsg');
 
-  authmsgEl.className = '';
 
-  if(!emailValue){
+  if(!email){
 
-    authmsgEl.textContent =
-      'Please enter an email address.';
+    msg.textContent =
+      'Please enter your email.';
 
-    authmsgEl.className =
+    msg.className =
       'error';
 
     return;
 
   }
 
-  if(!passwordValue){
 
-    authmsgEl.textContent =
-      'Please enter a password.';
+  if(!password){
 
-    authmsgEl.className =
+    msg.textContent =
+      'Please enter your password.';
+
+    msg.className =
       'error';
 
     return;
 
   }
+
 
   try{
 
-    const {data,error} =
-      await db.auth.signUp({
-        email:emailValue,
-        password:passwordValue
-      });
+    const {
+      data,
+      error
+    } =
+      await db.auth
+        .signUp({
+          email,
+          password
+        });
 
-    if(error){
 
-      authmsgEl.textContent =
-        error.message;
+    if(error)
+      throw error;
 
-      authmsgEl.className =
-        'error';
-
-      return;
-
-    }
 
     if(data.session){
-
-      authmsgEl.textContent =
-        'Account created.';
-
-      authmsgEl.className =
-        'success';
 
       await start();
 
     }else{
 
-      authmsgEl.textContent =
-        'Account created. Check your email if email confirmation is required.';
+      msg.textContent =
+        'Account created. Check your email if confirmation is required.';
 
-      authmsgEl.className =
+      msg.className =
         'success';
 
     }
 
   }catch(error){
 
-    console.error(error);
+    msg.textContent =
+      error.message ||
+      String(error);
 
-    authmsgEl.textContent =
-      'Signup error: ' +
-      (error.message || error);
-
-    authmsgEl.className =
+    msg.className =
       'error';
 
   }
-
-}
-
-
-/* ============================================================
-   LOGOUT
-============================================================ */
-
-async function logout(){
-
-  await db.auth.signOut();
 
 }
 
@@ -682,10 +826,13 @@ async function logout(){
 async function start(){
 
   el('login')
-    .classList.add('hidden');
+    .classList
+    .add('hidden');
 
   el('app')
-    .classList.remove('hidden');
+    .classList
+    .remove('hidden');
+
 
   await load();
 
@@ -693,7 +840,7 @@ async function start(){
 
 
 /* ============================================================
-   LOAD DATABASE
+   LOAD DATA
 ============================================================ */
 
 async function load(){
@@ -701,55 +848,84 @@ async function load(){
   const msg =
     el('msg');
 
+
   msg.textContent =
     'Loading SmartBasket data...';
+
 
   try{
 
     const [
+
       productsResult,
+
       storesResult,
+
       pricesResult,
+
       fuelResult
-    ] = await Promise.all([
 
-      db
-        .from('products')
-        .select('*')
-        .order('name'),
+    ] =
+      await Promise.all([
 
-      db
-        .from('stores')
-        .select('*')
-        .eq('is_active',true)
-        .order('id'),
+        db
+          .from('products')
+          .select('*')
+          .order('name'),
 
-      db
-        .from('store_products')
-        .select('*')
-        .eq('is_active',true),
 
-      db
-        .from('fuel_prices')
-        .select('*')
-        .eq('store_id',2)
-        .eq('fuel_type','regular')
-        .order('observed_at',{
-          ascending:false
-        })
-        .limit(1)
+        db
+          .from('stores')
+          .select('*')
+          .eq(
+            'is_active',
+            true
+          )
+          .order('id'),
 
-    ]);
+
+        db
+          .from('store_products')
+          .select('*')
+          .eq(
+            'is_active',
+            true
+          ),
+
+
+        db
+          .from('fuel_prices')
+          .select('*')
+          .eq(
+            'store_id',
+            2
+          )
+          .eq(
+            'fuel_type',
+            'regular'
+          )
+          .order(
+            'observed_at',
+            {
+              ascending:false
+            }
+          )
+          .limit(1)
+
+      ]);
 
 
     if(productsResult.error)
       throw productsResult.error;
 
+
     if(storesResult.error)
       throw storesResult.error;
 
+
     if(pricesResult.error)
       throw pricesResult.error;
+
 
     if(fuelResult.error)
       throw fuelResult.error;
@@ -758,37 +934,119 @@ async function load(){
     products =
       productsResult.data || [];
 
+
     stores =
       storesResult.data || [];
+
 
     prices =
       pricesResult.data || [];
 
+
     fuel =
-      fuelResult.data &&
-      fuelResult.data.length
+      fuelResult.data?.length
+
         ? Number(
-            fuelResult.data[0]
+            fuelResult
+              .data[0]
               .price_per_gallon
           )
+
         : null;
 
 
     renderProducts();
 
+
+    updateLastUpdate();
+
+
     msg.textContent =
-      `Loaded ${products.length} products, ${stores.length} stores and ${prices.length} store prices.`;
+      `Loaded ${products.length} products, ${stores.length} stores and ${prices.length} prices.`;
 
   }catch(error){
 
     console.error(
-      'Load error:',
+      'LOAD ERROR',
       error
     );
 
+
     msg.textContent =
-      'Could not load SmartBasket data: ' +
-      (error.message || error);
+      'Could not load database: ' +
+      (
+        error.message ||
+        String(error)
+      );
+
+  }
+
+}
+
+
+/* ============================================================
+   LAST UPDATE
+============================================================ */
+
+async function updateLastUpdate(){
+
+  try{
+
+    const result =
+      await db
+        .from('store_products')
+        .select(
+          'last_checked_at'
+        )
+        .not(
+          'last_checked_at',
+          'is',
+          null
+        )
+        .order(
+          'last_checked_at',
+          {
+            ascending:false
+          }
+        )
+        .limit(1);
+
+
+    if(
+      result.data &&
+      result.data.length
+    ){
+
+      latestDatabaseUpdate =
+        result.data[0]
+          .last_checked_at;
+
+
+      const date =
+        new Date(
+          latestDatabaseUpdate
+        );
+
+
+      el('lastUpdate')
+        .textContent =
+          'Latest price check: ' +
+          date.toLocaleString();
+
+    }else{
+
+      el('lastUpdate')
+        .textContent =
+          'No price-check date available yet.';
+
+    }
+
+  }catch(error){
+
+    console.error(
+      'Last update error:',
+      error
+    );
 
   }
 
@@ -804,6 +1062,7 @@ function renderProducts(){
   const box =
     el('products');
 
+
   if(!products.length){
 
     box.innerHTML =
@@ -815,72 +1074,117 @@ function renderProducts(){
 
 
   box.innerHTML =
-    products.map(product => {
+    products
+      .map(product => {
 
-      const checked =
-        selected.has(product.id);
-
-      const productPrices =
-        prices.filter(
-          p =>
-            String(p.product_id) ===
-            String(product.id)
-        );
+        const checked =
+          selected.has(
+            product.id
+          );
 
 
-      const available =
-        productPrices.length;
+        const productPrices =
+          prices.filter(
+            p =>
+              String(
+                p.product_id
+              ) ===
+              String(
+                product.id
+              )
+          );
 
 
-      return `
-        <div class="product">
+        return `
 
-          <label>
+          <div class="product">
 
-            <input
-              type="checkbox"
-              ${checked ? 'checked' : ''}
-              onchange="toggleProduct(${Number(product.id)},this.checked)"
-            >
+            <label>
 
-            <b>${esc(product.name)}</b>
+              <input
+                type="checkbox"
+                ${
+                  checked
+                    ? 'checked'
+                    : ''
+                }
+                onchange="
+                  toggleProduct(
+                    ${Number(product.id)},
+                    this.checked
+                  )
+                "
+              >
 
-          </label>
+              <b>
+                ${esc(product.name)}
+              </b>
 
-          ${
-            product.category
-              ? `<div class="muted">${esc(product.category)}</div>`
-              : ''
-          }
+            </label>
 
-          ${
-            available
-              ? `<div class="good">
-                   ${available} store price${available===1?'':'s'}
-                 </div>`
-              : `<div class="missing">
-                   Price not found yet
-                 </div>`
-          }
 
-        </div>
-      `;
+            ${
+              product.category
+                ? `
+                  <div class="muted">
+                    ${esc(product.category)}
+                  </div>
+                `
+                : ''
+            }
 
-    }).join('');
+
+            ${
+              productPrices.length
+
+                ? `
+                  <div class="good">
+                    ${
+                      productPrices.length
+                    }
+                    store price${
+                      productPrices.length === 1
+                        ? ''
+                        : 's'
+                    }
+                  </div>
+                `
+
+                : `
+                  <div class="missing">
+                    Price not found yet
+                  </div>
+                `
+            }
+
+          </div>
+
+        `;
+
+      })
+      .join('');
 
 }
 
 
 /* ============================================================
-   TOGGLE PRODUCT
+   SELECT PRODUCT
 ============================================================ */
 
-function toggleProduct(id,on){
+function toggleProduct(
+  id,
+  checked
+){
 
-  if(on)
+  if(checked){
+
     selected.add(id);
-  else
+
+  }else{
+
     selected.delete(id);
+
+  }
 
 }
 
@@ -897,24 +1201,39 @@ async function addProduct(){
   const msg =
     el('addMsg');
 
+  const button =
+    el('addProductBtn');
+
+
   const name =
     input.value.trim();
 
-  msg.className =
-    'muted';
 
   if(!name){
 
     msg.textContent =
-      'Enter a product name first.';
+      'Enter a product name.';
+
+    msg.className =
+      'error';
 
     return;
 
   }
 
 
+  button.disabled =
+    true;
+
+  button.textContent =
+    'Adding...';
+
+
   msg.textContent =
-    'Adding product to SmartBasket...';
+    'Saving product and searching stores...';
+
+  msg.className =
+    'muted';
 
 
   try{
@@ -927,24 +1246,20 @@ async function addProduct(){
       await db.auth.getSession();
 
 
-    if(!session){
-
-      msg.textContent =
-        'Your session expired. Please sign in again.';
-
-      msg.className =
-        'error';
-
-      return;
-
-    }
+    if(!session)
+      throw new Error(
+        'Your session expired. Please sign in again.'
+      );
 
 
     const response =
       await fetch(
+
         SUPABASE_URL +
         '/functions/v1/add-product',
+
         {
+
           method:'POST',
 
           headers:{
@@ -958,11 +1273,16 @@ async function addProduct(){
 
           body:
             JSON.stringify({
-              name:name,
-              default_unit:'each'
+
+              name,
+
+              default_unit:
+                'each'
+
             })
 
         }
+
       );
 
 
@@ -970,8 +1290,7 @@ async function addProduct(){
       await response.json();
 
 
-    if(!response.ok ||
-       data.error){
+    if(!response.ok){
 
       throw new Error(
         data.error ||
@@ -981,58 +1300,256 @@ async function addProduct(){
     }
 
 
-    input.value = '';
-
-
-    const found =
-      data.search &&
-      data.search.found
-        ? data.search.found.length
-        : 0;
-
-
-    msg.textContent =
-      `Added "${name}". Search completed: ${found} store price${found===1?'':'s'} found.`;
-
-    msg.className =
-      'success';
+    input.value =
+      '';
 
 
     await load();
 
 
-    const newProduct =
-      products.find(
-        p =>
-          String(p.id) ===
-          String(data.product.id)
-      );
-
-
-    if(newProduct){
+    if(data.product){
 
       selected.add(
-        newProduct.id
+        Number(
+          data.product.id
+        )
       );
 
-      renderProducts();
-
     }
+
+
+    renderProducts();
+
+
+    const found =
+      data.search?.found?.length ||
+      0;
+
+
+    msg.textContent =
+      `Added "${name}". Found ${found} store price${
+        found === 1
+          ? ''
+          : 's'
+      }.`;
+
+    msg.className =
+      'success';
 
 
   }catch(error){
 
     console.error(
-      'Add product error:',
+      'ADD PRODUCT ERROR',
       error
     );
 
+
     msg.textContent =
       'Could not add product: ' +
-      (error.message || error);
+      (
+        error.message ||
+        String(error)
+      );
 
     msg.className =
       'error';
+
+  }finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      '➕ Add Product';
+
+  }
+
+}
+
+
+/* ============================================================
+   REFRESH PRICES
+============================================================ */
+
+/*
+  IMPORTANT:
+
+  This does NOT delete old prices.
+
+  Server behavior should be:
+
+  NEW PRICE FOUND
+       ↓
+  UPDATE current_price
+
+  NO NEW PRICE
+       ↓
+  KEEP current_price
+
+  Either way:
+       ↓
+  update last_checked_at
+
+*/
+
+async function refreshPrices(){
+
+  const button =
+    el('refreshBtn');
+
+  const msg =
+    el('msg');
+
+
+  button.disabled =
+    true;
+
+  button.textContent =
+    '🔄 Scanning...';
+
+
+  msg.textContent =
+    'Scanning store websites for current prices...';
+
+  msg.className =
+    'muted';
+
+
+  try{
+
+    const {
+      data:{
+        session
+      }
+    } =
+      await db.auth.getSession();
+
+
+    if(!session)
+      throw new Error(
+        'Your session expired. Please sign in again.'
+      );
+
+
+    /*
+      This function performs the scan.
+
+      It must preserve an old price when
+      a new price is not found.
+    */
+
+    const response =
+      await fetch(
+
+        SUPABASE_URL +
+        '/functions/v1/refresh-all-prices',
+
+        {
+
+          method:'POST',
+
+          headers:{
+            Authorization:
+              'Bearer ' +
+              session.access_token,
+
+            'Content-Type':
+              'application/json'
+          },
+
+          body:
+            JSON.stringify({
+
+              preserve_old_prices:
+                true,
+
+              update_last_checked:
+                true
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        `Price refresh failed (${response.status})`
+      );
+
+    }
+
+
+    /*
+      Reload database after scanner.
+    */
+
+    await load();
+
+
+    msg.textContent =
+      `Price scan completed. ${
+        data.updated_count ??
+        0
+      } prices updated. ${
+        data.preserved_count ??
+        0
+      } previous prices preserved.`;
+
+    msg.className =
+      'success';
+
+
+  }catch(error){
+
+    console.error(
+      'REFRESH ERROR',
+      error
+    );
+
+
+    /*
+      IMPORTANT:
+
+      Even if scanner fails, we do NOT
+      erase the prices already in memory.
+
+      Reloading is also attempted so the
+      existing database values remain visible.
+    */
+
+    try{
+
+      await load();
+
+    }catch(_){}
+
+
+    msg.textContent =
+      'Price scan could not complete. Existing prices were kept. ' +
+      (
+        error.message ||
+        String(error)
+      );
+
+    msg.className =
+      'error';
+
+  }finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      '🔄 Refresh Prices';
 
   }
 
@@ -1046,41 +1563,74 @@ async function addProduct(){
 function clusters(){
 
   const result = [];
-  const used = new Set();
+
+  const used =
+    new Set();
 
 
-  for(const store of stores){
+  for(
+    const store
+    of stores
+  ){
 
-    if(used.has(store.id))
+    if(
+      used.has(
+        store.id
+      )
+    )
       continue;
 
 
-    const cluster = [store];
+    const cluster =
+      [store];
 
-    used.add(store.id);
+
+    used.add(
+      store.id
+    );
 
 
-    for(const other of stores){
+    for(
+      const other
+      of stores
+    ){
 
-      if(used.has(other.id))
+      if(
+        used.has(
+          other.id
+        )
+      )
         continue;
 
 
       const distance =
-        hav(store,other);
+        hav(
+          store,
+          other
+        );
 
 
-      if(distance <= CLUSTER_MILES){
+      if(
+        distance <=
+        CLUSTER_MILES
+      ){
 
-        cluster.push(other);
-        used.add(other.id);
+        cluster.push(
+          other
+        );
+
+        used.add(
+          other.id
+        );
 
       }
 
     }
 
 
-    result.push(cluster);
+    result.push(
+      cluster
+    );
 
   }
 
@@ -1091,7 +1641,7 @@ function clusters(){
 
 
 /* ============================================================
-   OPTIMIZE SHOPPING
+   OPTIMIZE
 ============================================================ */
 
 async function optimize(){
@@ -1101,6 +1651,9 @@ async function optimize(){
 
   const msg =
     el('msg');
+
+  const button =
+    el('findBtn');
 
 
   if(!selected.size){
@@ -1116,21 +1669,32 @@ async function optimize(){
   const chosen =
     products.filter(
       p =>
-        selected.has(p.id)
+        selected.has(
+          p.id
+        )
     );
 
 
   if(!chosen.length){
 
-    results.innerHTML =
-      '<p class="muted">No products selected.</p>';
+    msg.textContent =
+      'No products selected.';
 
     return;
 
   }
 
 
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    'Calculating...';
+
+
   results.innerHTML = `
+
     <div class="store">
 
       <b>
@@ -1138,15 +1702,12 @@ async function optimize(){
       </b>
 
       <p class="muted">
-        Comparing prices across all tracked stores.
+        Comparing prices, stores and gas cost.
       </p>
 
     </div>
+
   `;
-
-
-  msg.textContent =
-    'Calculating shopping plan...';
 
 
   try{
@@ -1159,56 +1720,29 @@ async function optimize(){
       await db.auth.getSession();
 
 
-    if(!session){
-
-      msg.textContent =
-        'Your session expired. Please sign in again.';
-
-      return;
-
-    }
+    if(!session)
+      throw new Error(
+        'Your session expired.'
+      );
 
 
-    /* GET GAS PRICE */
+    if(
+      !fuel ||
+      fuel <= 0
+    ){
 
-    if(fuel == null){
-
-      const fuelResult =
-        await db
-          .from('fuel_prices')
-          .select('*')
-          .eq('store_id',2)
-          .eq('fuel_type','regular')
-          .order('observed_at',{
-            ascending:false
-          })
-          .limit(1);
-
-
-      if(fuelResult.error)
-        throw fuelResult.error;
-
-
-      if(
-        fuelResult.data &&
-        fuelResult.data.length
-      ){
-
-        fuel =
-          Number(
-            fuelResult.data[0]
-              .price_per_gallon
-          );
-
-      }
+      await load();
 
     }
 
 
-    if(!fuel || fuel <= 0){
+    if(
+      !fuel ||
+      fuel <= 0
+    ){
 
       throw new Error(
-        "BJ's Stoughton gas price is not available."
+        "BJ's Stoughton gas price is unavailable."
       );
 
     }
@@ -1217,35 +1751,41 @@ async function optimize(){
     const gasPrice =
       Math.max(
         0,
-        Number(fuel) - 0.10
+        Number(fuel) -
+        0.10
       );
 
 
-    /* DISTANCE FROM HOME */
-
-    function distanceFromHome(store){
+    function homeDistance(
+      store
+    ){
 
       return hav(
         {
-          latitude:HOME.lat,
-          longitude:HOME.lon
+          latitude:
+            HOME.lat,
+
+          longitude:
+            HOME.lon
         },
+
         store
       );
 
     }
 
 
-    /* CREATE ROUTES */
-
     const routeDefs = [];
 
 
     /*
-      Every individual store.
+      Individual stores
     */
 
-    for(const store of stores){
+    for(
+      const store
+      of stores
+    ){
 
       routeDefs.push({
 
@@ -1259,7 +1799,7 @@ async function optimize(){
         distance_miles:
           Number(
             (
-              distanceFromHome(store) *
+              homeDistance(store) *
               2 *
               1.25
             ).toFixed(2)
@@ -1271,7 +1811,7 @@ async function optimize(){
 
 
     /*
-      Nearby stores as a cluster.
+      Nearby store clusters
     */
 
     for(
@@ -1279,23 +1819,33 @@ async function optimize(){
       of clusters()
     ){
 
-      if(cluster.length <= 1)
+      if(
+        cluster.length <= 1
+      )
         continue;
 
 
       const ordered =
-        [...cluster].sort(
-          (a,b) =>
-            distanceFromHome(a) -
-            distanceFromHome(b)
-        );
+        [...cluster]
+          .sort(
+            (a,b) =>
+              homeDistance(a) -
+              homeDistance(b)
+          );
 
 
-      let miles = 0;
+      let miles =
+        0;
+
 
       let previous = {
-        latitude:HOME.lat,
-        longitude:HOME.lon
+
+        latitude:
+          HOME.lat,
+
+        longitude:
+          HOME.lon
+
       };
 
 
@@ -1304,35 +1854,45 @@ async function optimize(){
         of ordered
       ){
 
-        miles += hav(
-          previous,
-          store
-        );
+        miles +=
+          hav(
+            previous,
+            store
+          );
 
-        previous = store;
+
+        previous =
+          store;
 
       }
 
 
-      miles += hav(
-        previous,
-        {
-          latitude:HOME.lat,
-          longitude:HOME.lon
-        }
-      );
+      miles +=
+        hav(
+          previous,
+          {
+            latitude:
+              HOME.lat,
+
+            longitude:
+              HOME.lon
+          }
+        );
 
 
       routeDefs.push({
 
         name:
           ordered
-            .map(s => s.name)
+            .map(
+              s => s.name
+            )
             .join(' + '),
 
         store_ids:
           ordered.map(
-            s => Number(s.id)
+            s =>
+              Number(s.id)
           ),
 
         distance_miles:
@@ -1347,12 +1907,8 @@ async function optimize(){
     }
 
 
-    /*
-      Call the actual Supabase optimizer.
-    */
-
     msg.textContent =
-      'Comparing prices and calculating total trip cost...';
+      'Comparing prices and calculating trip cost...';
 
 
     const response =
@@ -1366,12 +1922,14 @@ async function optimize(){
           method:'POST',
 
           headers:{
+
             Authorization:
               'Bearer ' +
               session.access_token,
 
             'Content-Type':
               'application/json'
+
           },
 
           body:
@@ -1383,9 +1941,12 @@ async function optimize(){
                   product => ({
 
                     product_id:
-                      Number(product.id),
+                      Number(
+                        product.id
+                      ),
 
-                    quantity:1,
+                    quantity:
+                      1,
 
                     unit:
                       product.default_unit ||
@@ -1401,9 +1962,12 @@ async function optimize(){
                   store => ({
 
                     store_id:
-                      Number(store.id),
+                      Number(
+                        store.id
+                      ),
 
-                    distance_miles:0
+                    distance_miles:
+                      0
 
                   })
                 ),
@@ -1435,30 +1999,21 @@ async function optimize(){
 
       throw new Error(
         data.error ||
-        `Optimizer returned HTTP ${response.status}`
+        `Optimizer HTTP ${response.status}`
       );
 
     }
 
 
-    if(data.error){
-
+    if(data.error)
       throw new Error(
         data.error
       );
 
-    }
-
 
     const routes =
-      Array.isArray(data.routes)
-        ? data.routes
-        : [];
+      data.routes || [];
 
-
-    /*
-      Complete routes.
-    */
 
     const complete =
       routes
@@ -1468,28 +2023,28 @@ async function optimize(){
         )
         .sort(
           (a,b) =>
-            Number(a.true_total_cost) -
-            Number(b.true_total_cost)
+            Number(
+              a.true_total_cost
+            ) -
+            Number(
+              b.true_total_cost
+            )
         );
 
 
-    /*
-      Price Rite baseline.
-    */
-
-    const priceRiteRoute =
+    const priceRite =
       complete.find(
         r =>
-          r.store_ids &&
-          r.store_ids.length === 1 &&
-          Number(r.store_ids[0]) === 1
+          r.store_ids?.length === 1 &&
+          Number(
+            r.store_ids[0]
+          ) === 1
       );
 
 
     let winner =
-      complete.length
-        ? complete[0]
-        : null;
+      complete[0] ||
+      null;
 
 
     let ruleMessage =
@@ -1497,33 +2052,38 @@ async function optimize(){
 
 
     /*
-      Apply $5 rule.
+      $5 Price Rite rule
     */
 
     if(
-      priceRiteRoute &&
+      priceRite &&
       winner &&
-      winner !== priceRiteRoute
+      winner !== priceRite
     ){
 
       const savings =
         Number(
-          priceRiteRoute.true_total_cost
+          priceRite.true_total_cost
         ) -
         Number(
           winner.true_total_cost
         );
 
 
-      if(savings <= 5){
+      if(
+        savings <= 5
+      ){
 
         winner =
-          priceRiteRoute;
+          priceRite;
 
 
         ruleMessage =
           `The alternative saves ${money(
-            Math.max(0,savings)
+            Math.max(
+              0,
+              savings
+            )
           )} versus Price Rite, so it does not exceed the $5 savings threshold.`;
 
       }else{
@@ -1538,11 +2098,12 @@ async function optimize(){
     }
 
 
-    let html = '';
+    let html =
+      '';
 
 
     /*
-      BEST PLAN
+      WINNER
     */
 
     if(winner){
@@ -1558,11 +2119,15 @@ async function optimize(){
           <h3>
             ${esc(
               winner.name ||
-              winner.store_ids.join(' + ')
+              winner.store_ids.join(
+                ' + '
+              )
             )}
           </h3>
 
+
           <div class="grid">
+
 
             <div>
 
@@ -1625,12 +2190,14 @@ async function optimize(){
 
               <b>
                 ${Number(
-                  winner.distance_miles || 0
+                  winner.distance_miles ||
+                  0
                 ).toFixed(1)}
                 miles
               </b>
 
             </div>
+
 
           </div>
 
@@ -1639,11 +2206,14 @@ async function optimize(){
             ruleMessage
               ? `
                 <p class="muted">
-                  ${esc(ruleMessage)}
+                  ${esc(
+                    ruleMessage
+                  )}
                 </p>
               `
               : ''
           }
+
 
         </div>
 
@@ -1654,59 +2224,79 @@ async function optimize(){
         WHAT TO BUY
       */
 
-      const grouped = {};
+      const grouped =
+        {};
 
 
       (
-        winner.selections || []
-      ).forEach(selection => {
+        winner.selections ||
+        []
+      ).forEach(
+        selection => {
 
-        const store =
-          stores.find(
-            s =>
-              Number(s.id) ===
-              Number(selection.store_id)
-          );
-
-
-        const product =
-          chosen.find(
-            p =>
-              Number(p.id) ===
-              Number(selection.product_id)
-          );
+          const store =
+            stores.find(
+              s =>
+                Number(s.id) ===
+                Number(
+                  selection.store_id
+                )
+            );
 
 
-        const storeName =
-          store
-            ? store.name
-            : `Store ${selection.store_id}`;
+          const product =
+            chosen.find(
+              p =>
+                Number(p.id) ===
+                Number(
+                  selection.product_id
+                )
+            );
 
 
-        if(!grouped[storeName])
-          grouped[storeName] = [];
+          const storeName =
+            store
+              ? store.name
+              : `Store ${
+                  selection.store_id
+                }`;
 
 
-        grouped[storeName].push({
+          if(
+            !grouped[storeName]
+          ){
 
-          name:
-            product
-              ? product.name
-              : `Product ${selection.product_id}`,
+            grouped[storeName] =
+              [];
 
-          price:
-            Number(
-              selection.extended_price
-            ),
+          }
 
-          packages:
-            Number(
-              selection.packages || 1
-            )
 
-        });
+          grouped[storeName]
+            .push({
 
-      });
+              name:
+                product
+                  ? product.name
+                  : `Product ${
+                      selection.product_id
+                    }`,
+
+              price:
+                Number(
+                  selection.extended_price
+                ),
+
+              packages:
+                Number(
+                  selection.packages ||
+                  1
+                )
+
+            });
+
+        }
+      );
 
 
       html += `
@@ -1722,13 +2312,17 @@ async function optimize(){
 
       for(
         const storeName
-        of Object.keys(grouped)
+        of Object.keys(
+          grouped
+        )
       ){
 
         html += `
 
           <h4>
-            ${esc(storeName)}
+            ${esc(
+              storeName
+            )}
           </h4>
 
         `;
@@ -1736,7 +2330,9 @@ async function optimize(){
 
         for(
           const item
-          of grouped[storeName]
+          of grouped[
+            storeName
+          ]
         ){
 
           html += `
@@ -1744,18 +2340,25 @@ async function optimize(){
             <p>
 
               🛒
-              ${esc(item.name)}
+              ${esc(
+                item.name
+              )}
 
               ${
                 item.packages > 1
-                  ? ` × ${item.packages}`
+                  ? `
+                    ×
+                    ${item.packages}
+                  `
                   : ''
               }
 
               —
 
               <b>
-                ${money(item.price)}
+                ${money(
+                  item.price
+                )}
               </b>
 
             </p>
@@ -1775,21 +2378,18 @@ async function optimize(){
 
     }else{
 
-      /*
-        NO COMPLETE ROUTE
-      */
-
       html += `
 
         <div class="store">
 
           <h3>
-            No complete shopping plan yet
+            No complete shopping plan
           </h3>
 
           <p class="muted">
-            SmartBasket could not find a current
-            price for every selected product.
+            SmartBasket does not currently
+            have a price for every selected
+            product.
           </p>
 
         </div>
@@ -1800,7 +2400,7 @@ async function optimize(){
 
 
     /*
-      ALL SHOPPING OPTIONS
+      ALL ROUTES
     */
 
     html += `
@@ -1814,20 +2414,10 @@ async function optimize(){
     `;
 
 
-    if(!routes.length){
-
-      html += `
-
-        <p class="muted">
-          No routes were returned.
-        </p>
-
-      `;
-
-    }
-
-
-    routes.forEach(route => {
+    for(
+      const route
+      of routes
+    ){
 
       const isWinner =
         winner &&
@@ -1839,18 +2429,23 @@ async function optimize(){
 
       html += `
 
-        <div class="store ${
-          isWinner
-            ? 'winner'
-            : ''
-        }">
+        <div
+          class="store ${
+            isWinner
+              ? 'winner'
+              : ''
+          }"
+        >
 
           <b>
             ${esc(
               route.name ||
-              route.store_ids.join(' + ')
+              route.store_ids.join(
+                ' + '
+              )
             )}
           </b>
+
 
           <p>
 
@@ -1883,7 +2478,8 @@ async function optimize(){
 
             Distance:
             ${Number(
-              route.distance_miles || 0
+              route.distance_miles ||
+              0
             ).toFixed(1)}
             miles
 
@@ -1908,8 +2504,7 @@ async function optimize(){
 
 
           ${
-            route.missing_items &&
-            route.missing_items.length
+            route.missing_items?.length
 
               ? `
 
@@ -1918,28 +2513,34 @@ async function optimize(){
                   Missing:
 
                   ${
-                    route.missing_items
+                    route
+                      .missing_items
                       .map(
-                        m => {
+                        item => {
 
                           const p =
                             chosen.find(
                               product =>
-                                Number(product.id) ===
-                                Number(m.product_id)
+                                Number(
+                                  product.id
+                                ) ===
+                                Number(
+                                  item.product_id
+                                )
                             );
 
 
                           return esc(
                             p
                               ? p.name
-                              : `Product ${m.product_id}`
+                              : `Product ${
+                                  item.product_id
+                                }`
                           );
 
                         }
                       )
                       .join(', ')
-
                   }
 
                 </p>
@@ -1949,11 +2550,12 @@ async function optimize(){
               : ''
           }
 
+
         </div>
 
       `;
 
-    });
+    }
 
 
     html += `
@@ -1968,17 +2570,21 @@ async function optimize(){
 
 
     msg.textContent =
-      `Done. Compared ${chosen.length} selected product${
+      `Done. Compared ${
+        chosen.length
+      } selected product${
         chosen.length === 1
           ? ''
           : 's'
-      } across ${stores.length} stores.`;
+      } across ${
+        stores.length
+      } stores.`;
 
 
   }catch(error){
 
     console.error(
-      'OPTIMIZER ERROR:',
+      'OPTIMIZER ERROR',
       error
     );
 
@@ -1998,11 +2604,6 @@ async function optimize(){
           )}
         </p>
 
-        <p class="muted">
-          Open the browser console with F12
-          if you need the technical error.
-        </p>
-
       </div>
 
     `;
@@ -2011,23 +2612,34 @@ async function optimize(){
     msg.textContent =
       'Shopping plan failed.';
 
+  }finally{
+
+    button.disabled =
+      false;
+
+    button.textContent =
+      'Find Best Shopping Plan';
+
   }
 
 }
 
 
 /* ============================================================
-   AUTOMATIC SESSION RESTORE
+   AUTOMATIC SESSION
 ============================================================ */
 
-db.auth.getSession()
+db.auth
+  .getSession()
   .then(
-    async ({data,error}) => {
+    async ({
+      data,
+      error
+    }) => {
 
       if(error){
 
         console.error(
-          'Session check error:',
           error
         );
 
@@ -2050,55 +2662,64 @@ db.auth.getSession()
 
 
 /* ============================================================
-   AUTH STATE LISTENER
+   AUTH STATE
 ============================================================ */
 
-db.auth.onAuthStateChange(
-  async (event,session) => {
+db.auth
+  .onAuthStateChange(
+    async (
+      event,
+      session
+    ) => {
 
-    console.log(
-      'Auth event:',
-      event
-    );
+      console.log(
+        'Auth event:',
+        event
+      );
 
-
-    if(
-      session &&
-      (
-        event === 'SIGNED_IN' ||
-        event === 'INITIAL_SESSION'
-      )
-    ){
 
       if(
-        el('app')
-          .classList
-          .contains('hidden')
+        session &&
+        (
+          event ===
+            'SIGNED_IN' ||
+          event ===
+            'INITIAL_SESSION'
+        )
       ){
 
-        await start();
+        if(
+          el('app')
+            .classList
+            .contains('hidden')
+        ){
+
+          await start();
+
+        }
+
+      }
+
+
+      if(
+        event ===
+        'SIGNED_OUT'
+      ){
+
+        el('app')
+          .classList
+          .add('hidden');
+
+
+        el('login')
+          .classList
+          .remove('hidden');
 
       }
 
     }
+  );
 
-
-    if(
-      event === 'SIGNED_OUT'
-    ){
-
-      el('app')
-        .classList
-        .add('hidden');
-
-      el('login')
-        .classList
-        .remove('hidden');
-
-    }
-
-  }
-);
 
 </script>
 
