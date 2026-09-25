@@ -676,7 +676,7 @@ async function logout(){
 
 
 /* ============================================================
-   START APPLICATION
+   START
 ============================================================ */
 
 async function start(){
@@ -1091,123 +1091,6 @@ function clusters(){
 
 
 /* ============================================================
-   ROUTE
-============================================================ */
-
-async function route(cluster){
-
-  try{
-
-    const {
-      data:{
-        session
-      }
-    } =
-      await db.auth.getSession();
-
-
-    if(!session)
-      return null;
-
-
-    const response =
-      await fetch(
-        SUPABASE_URL +
-        '/functions/v1/calculate-store-routes',
-        {
-          method:'POST',
-
-          headers:{
-            Authorization:
-              'Bearer ' +
-              session.access_token,
-
-            'Content-Type':
-              'application/json'
-          },
-
-          body:
-            JSON.stringify({
-
-              home:HOME,
-
-              stores:
-                cluster.map(
-                  s => ({
-                    id:Number(s.id),
-
-                    latitude:
-                      Number(s.latitude),
-
-                    longitude:
-                      Number(s.longitude)
-                  })
-                )
-
-            })
-
-        }
-      );
-
-
-    if(!response.ok)
-      return null;
-
-
-    const j =
-      await response.json();
-
-
-    return {
-
-      miles:
-        Number(j.miles),
-
-      duration_minutes:
-        Number(j.duration_minutes),
-
-      store_ids:
-        j.store_ids ||
-        cluster.map(
-          x => String(x.id)
-        )
-
-    };
-
-
-  }catch(error){
-
-    console.error(
-      'Route error:',
-      error
-    );
-
-    return null;
-
-  }
-
-}
-
-
-/* ============================================================
-   FIND PRICE
-============================================================ */
-
-function priceFor(pid,sid){
-
-  return prices.find(
-    x =>
-      String(x.product_id) ===
-      String(pid) &&
-
-      String(x.store_id) ===
-      String(sid)
-  ) || null;
-
-}
-
-
-/* ============================================================
    OPTIMIZE SHOPPING
 ============================================================ */
 
@@ -1247,11 +1130,23 @@ async function optimize(){
   }
 
 
-  results.innerHTML =
-    '<p>Searching the SmartBasket price database and calculating the best multi-store plan...</p>';
+  results.innerHTML = `
+    <div class="store">
+
+      <b>
+        Calculating shopping plan...
+      </b>
+
+      <p class="muted">
+        Comparing prices across all tracked stores.
+      </p>
+
+    </div>
+  `;
+
 
   msg.textContent =
-    'Building your shopping plan...';
+    'Calculating shopping plan...';
 
 
   try{
@@ -1274,158 +1169,191 @@ async function optimize(){
     }
 
 
+    /* GET GAS PRICE */
+
     if(fuel == null){
 
-      await load();
+      const fuelResult =
+        await db
+          .from('fuel_prices')
+          .select('*')
+          .eq('store_id',2)
+          .eq('fuel_type','regular')
+          .order('observed_at',{
+            ascending:false
+          })
+          .limit(1);
+
+
+      if(fuelResult.error)
+        throw fuelResult.error;
+
+
+      if(
+        fuelResult.data &&
+        fuelResult.data.length
+      ){
+
+        fuel =
+          Number(
+            fuelResult.data[0]
+              .price_per_gallon
+          );
+
+      }
 
     }
 
 
-    if(fuel == null || fuel <= 0){
+    if(!fuel || fuel <= 0){
 
       throw new Error(
-        "BJ's Stoughton gas price is not available yet. Refresh prices and try again."
+        "BJ's Stoughton gas price is not available."
       );
 
     }
 
+
+    const gasPrice =
+      Math.max(
+        0,
+        Number(fuel) - 0.10
+      );
+
+
+    /* DISTANCE FROM HOME */
+
+    function distanceFromHome(store){
+
+      return hav(
+        {
+          latitude:HOME.lat,
+          longitude:HOME.lon
+        },
+        store
+      );
+
+    }
+
+
+    /* CREATE ROUTES */
 
     const routeDefs = [];
 
 
     /*
-      Build routes for every individual store
-      and every nearby store cluster.
+      Every individual store.
     */
 
-    for(const cluster of clusters()){
+    for(const store of stores){
 
-      /*
-        Individual stores
-      */
+      routeDefs.push({
 
-      for(const store of cluster){
+        name:
+          store.name,
 
-        const rt =
-          await route([store]);
+        store_ids:[
+          Number(store.id)
+        ],
 
+        distance_miles:
+          Number(
+            (
+              distanceFromHome(store) *
+              2 *
+              1.25
+            ).toFixed(2)
+          )
 
-        if(rt){
-
-          routeDefs.push({
-
-            name:
-              store.name,
-
-            store_ids:[
-              Number(store.id)
-            ],
-
-            distance_miles:
-              Number(rt.miles)
-
-          });
-
-        }
-
-      }
-
-
-      /*
-        Nearby cluster
-      */
-
-      if(cluster.length > 1){
-
-        const rt =
-          await route(cluster);
-
-
-        if(rt){
-
-          routeDefs.push({
-
-            name:
-              cluster
-                .map(x => x.name)
-                .join(' + '),
-
-            store_ids:
-              cluster.map(
-                x => Number(x.id)
-              ),
-
-            distance_miles:
-              Number(rt.miles)
-
-          });
-
-        }
-
-      }
+      });
 
     }
 
 
     /*
-      Always include Price Rite
-      as the user's baseline.
+      Nearby stores as a cluster.
     */
 
-    const priceRite =
-      stores.find(
-        x =>
-          Number(x.id) === 1
-      );
-
-
-    if(
-      priceRite &&
-      !routeDefs.some(
-        r =>
-          r.store_ids.length === 1 &&
-          r.store_ids[0] === 1
-      )
+    for(
+      const cluster
+      of clusters()
     ){
 
-      const rt =
-        await route([
-          priceRite
-        ]);
+      if(cluster.length <= 1)
+        continue;
 
 
-      if(rt){
+      const ordered =
+        [...cluster].sort(
+          (a,b) =>
+            distanceFromHome(a) -
+            distanceFromHome(b)
+        );
 
-        routeDefs.push({
 
-          name:
-            priceRite.name,
+      let miles = 0;
 
-          store_ids:[1],
+      let previous = {
+        latitude:HOME.lat,
+        longitude:HOME.lon
+      };
 
-          distance_miles:
-            Number(rt.miles)
 
-        });
+      for(
+        const store
+        of ordered
+      ){
+
+        miles += hav(
+          previous,
+          store
+        );
+
+        previous = store;
 
       }
 
-    }
 
-
-    if(!routeDefs.length){
-
-      throw new Error(
-        'No routes could be calculated.'
+      miles += hav(
+        previous,
+        {
+          latitude:HOME.lat,
+          longitude:HOME.lon
+        }
       );
+
+
+      routeDefs.push({
+
+        name:
+          ordered
+            .map(s => s.name)
+            .join(' + '),
+
+        store_ids:
+          ordered.map(
+            s => Number(s.id)
+          ),
+
+        distance_miles:
+          Number(
+            (
+              miles * 1.25
+            ).toFixed(2)
+          )
+
+      });
 
     }
 
 
     /*
-      Send the actual shopping request
-      to the backend optimizer.
+      Call the actual Supabase optimizer.
     */
+
+    msg.textContent =
+      'Comparing prices and calculating total trip cost...';
+
 
     const response =
       await fetch(
@@ -1438,14 +1366,12 @@ async function optimize(){
           method:'POST',
 
           headers:{
-
             Authorization:
               'Bearer ' +
               session.access_token,
 
             'Content-Type':
               'application/json'
-
           },
 
           body:
@@ -1454,15 +1380,15 @@ async function optimize(){
               items:
 
                 chosen.map(
-                  p => ({
+                  product => ({
 
                     product_id:
-                      Number(p.id),
+                      Number(product.id),
 
                     quantity:1,
 
                     unit:
-                      p.default_unit ||
+                      product.default_unit ||
                       'each'
 
                   })
@@ -1472,10 +1398,10 @@ async function optimize(){
               stores:
 
                 stores.map(
-                  s => ({
+                  store => ({
 
                     store_id:
-                      Number(s.id),
+                      Number(store.id),
 
                     distance_miles:0
 
@@ -1488,11 +1414,7 @@ async function optimize(){
 
 
               gas_price_per_gallon:
-
-                Math.max(
-                  0,
-                  Number(fuel) - 0.10
-                ),
+                gasPrice,
 
 
               mpg:
@@ -1509,28 +1431,40 @@ async function optimize(){
       await response.json();
 
 
-    if(
-      !response.ok ||
-      data.error
-    ){
+    if(!response.ok){
 
       throw new Error(
         data.error ||
-        'Shopping optimizer failed.'
+        `Optimizer returned HTTP ${response.status}`
+      );
+
+    }
+
+
+    if(data.error){
+
+      throw new Error(
+        data.error
       );
 
     }
 
 
     const routes =
-      data.routes || [];
+      Array.isArray(data.routes)
+        ? data.routes
+        : [];
 
+
+    /*
+      Complete routes.
+    */
 
     const complete =
       routes
         .filter(
           r =>
-            r.complete
+            r.complete === true
         )
         .sort(
           (a,b) =>
@@ -1539,33 +1473,37 @@ async function optimize(){
         );
 
 
+    /*
+      Price Rite baseline.
+    */
+
     const priceRiteRoute =
       complete.find(
         r =>
+          r.store_ids &&
           r.store_ids.length === 1 &&
           Number(r.store_ids[0]) === 1
       );
 
 
-    const cheapest =
-      complete[0] || null;
-
-
-    /*
-      Apply the user's $5 rule.
-    */
-
     let winner =
-      cheapest;
+      complete.length
+        ? complete[0]
+        : null;
+
 
     let ruleMessage =
       '';
 
 
+    /*
+      Apply $5 rule.
+    */
+
     if(
       priceRiteRoute &&
-      cheapest &&
-      cheapest !== priceRiteRoute
+      winner &&
+      winner !== priceRiteRoute
     ){
 
       const savings =
@@ -1573,7 +1511,7 @@ async function optimize(){
           priceRiteRoute.true_total_cost
         ) -
         Number(
-          cheapest.true_total_cost
+          winner.true_total_cost
         );
 
 
@@ -1584,22 +1522,18 @@ async function optimize(){
 
 
         ruleMessage =
-          `The alternative plan saves ${money(Math.max(0,savings))} versus Price Rite, so it does not pass the $5 savings rule.`;
+          `The alternative saves ${money(
+            Math.max(0,savings)
+          )} versus Price Rite, so it does not exceed the $5 savings threshold.`;
 
       }else{
 
         ruleMessage =
-          `The selected alternative saves ${money(savings)} versus Price Rite, so it passes the $5 savings rule.`;
+          `The selected plan saves ${money(
+            savings
+          )} versus Price Rite.`;
 
       }
-
-    }else if(
-      priceRiteRoute &&
-      !cheapest
-    ){
-
-      winner =
-        priceRiteRoute;
 
     }
 
@@ -1607,50 +1541,99 @@ async function optimize(){
     let html = '';
 
 
+    /*
+      BEST PLAN
+    */
+
     if(winner){
 
       html += `
 
-        <div class="winner store">
+        <div class="store winner">
+
+          <h2>
+            🛒 Best Shopping Plan
+          </h2>
 
           <h3>
-            Best Shopping Plan
-          </h3>
-
-          <b>
             ${esc(
               winner.name ||
               winner.store_ids.join(' + ')
             )}
-          </b>
+          </h3>
 
-          <p>
-            Groceries:
-            <b>
-              ${money(winner.food_cost)}
-            </b>
+          <div class="grid">
 
-            +
+            <div>
 
-            Gas:
-            <b>
-              ${money(winner.fuel_cost)}
-            </b>
+              <span class="muted">
+                Groceries
+              </span>
 
-            =
+              <br>
 
-            <b>
-              ${money(winner.true_total_cost)}
-            </b>
-          </p>
+              <b>
+                ${money(
+                  winner.food_cost
+                )}
+              </b>
 
-          <p>
-            Round trip:
-            ${Number(
-              winner.distance_miles
-            ).toFixed(1)}
-            miles
-          </p>
+            </div>
+
+
+            <div>
+
+              <span class="muted">
+                Gas
+              </span>
+
+              <br>
+
+              <b>
+                ${money(
+                  winner.fuel_cost
+                )}
+              </b>
+
+            </div>
+
+
+            <div>
+
+              <span class="muted">
+                TOTAL TRIP COST
+              </span>
+
+              <br>
+
+              <b>
+                ${money(
+                  winner.true_total_cost
+                )}
+              </b>
+
+            </div>
+
+
+            <div>
+
+              <span class="muted">
+                Driving
+              </span>
+
+              <br>
+
+              <b>
+                ${Number(
+                  winner.distance_miles || 0
+                ).toFixed(1)}
+                miles
+              </b>
+
+            </div>
+
+          </div>
+
 
           ${
             ruleMessage
@@ -1666,22 +1649,147 @@ async function optimize(){
 
       `;
 
-    }else{
+
+      /*
+        WHAT TO BUY
+      */
+
+      const grouped = {};
+
+
+      (
+        winner.selections || []
+      ).forEach(selection => {
+
+        const store =
+          stores.find(
+            s =>
+              Number(s.id) ===
+              Number(selection.store_id)
+          );
+
+
+        const product =
+          chosen.find(
+            p =>
+              Number(p.id) ===
+              Number(selection.product_id)
+          );
+
+
+        const storeName =
+          store
+            ? store.name
+            : `Store ${selection.store_id}`;
+
+
+        if(!grouped[storeName])
+          grouped[storeName] = [];
+
+
+        grouped[storeName].push({
+
+          name:
+            product
+              ? product.name
+              : `Product ${selection.product_id}`,
+
+          price:
+            Number(
+              selection.extended_price
+            ),
+
+          packages:
+            Number(
+              selection.packages || 1
+            )
+
+        });
+
+      });
+
 
       html += `
 
         <div class="store">
 
-          <b class="error">
-            No complete plan is available
-            with the prices currently in
-            the database.
-          </b>
+          <h3>
+            What to Buy
+          </h3>
+
+      `;
+
+
+      for(
+        const storeName
+        of Object.keys(grouped)
+      ){
+
+        html += `
+
+          <h4>
+            ${esc(storeName)}
+          </h4>
+
+        `;
+
+
+        for(
+          const item
+          of grouped[storeName]
+        ){
+
+          html += `
+
+            <p>
+
+              🛒
+              ${esc(item.name)}
+
+              ${
+                item.packages > 1
+                  ? ` × ${item.packages}`
+                  : ''
+              }
+
+              —
+
+              <b>
+                ${money(item.price)}
+              </b>
+
+            </p>
+
+          `;
+
+        }
+
+      }
+
+
+      html += `
+
+        </div>
+
+      `;
+
+    }else{
+
+      /*
+        NO COMPLETE ROUTE
+      */
+
+      html += `
+
+        <div class="store">
+
+          <h3>
+            No complete shopping plan yet
+          </h3>
 
           <p class="muted">
-            SmartBasket still shows partial
-            routes and every missing product
-            below.
+            SmartBasket could not find a current
+            price for every selected product.
           </p>
 
         </div>
@@ -1692,206 +1800,167 @@ async function optimize(){
 
 
     /*
-      Show every route.
+      ALL SHOPPING OPTIONS
     */
 
-    html +=
+    html += `
 
-      routes.map(
-        (r,i) => {
+      <div class="store">
 
-          const selectedRoute =
-            winner &&
-            r.store_ids.join(',') ===
-            winner.store_ids.join(',');
+        <h3>
+          All Shopping Options
+        </h3>
 
-
-          const missing =
-            r.missing_items || [];
+    `;
 
 
-          const selections =
-            r.selections || [];
+    if(!routes.length){
+
+      html += `
+
+        <p class="muted">
+          No routes were returned.
+        </p>
+
+      `;
+
+    }
 
 
-          const grouped = {};
+    routes.forEach(route => {
+
+      const isWinner =
+        winner &&
+        route.store_ids &&
+        winner.store_ids &&
+        route.store_ids.join(',') ===
+        winner.store_ids.join(',');
 
 
-          selections.forEach(
-            x => {
+      html += `
 
-              const store =
-                stores.find(
-                  s =>
-                    Number(s.id) ===
-                    Number(x.store_id)
-                );
+        <div class="store ${
+          isWinner
+            ? 'winner'
+            : ''
+        }">
 
+          <b>
+            ${esc(
+              route.name ||
+              route.store_ids.join(' + ')
+            )}
+          </b>
 
-              const name =
-                store
-                  ? store.name
-                  : 'Store ' + x.store_id;
+          <p>
 
+            Groceries:
+            <b>
+              ${money(
+                route.food_cost
+              )}
+            </b>
 
-              if(!grouped[name])
-                grouped[name] = [];
+            <br>
 
+            Gas:
+            <b>
+              ${money(
+                route.fuel_cost
+              )}
+            </b>
 
-              const product =
-                chosen.find(
-                  p =>
-                    Number(p.id) ===
-                    Number(x.product_id)
-                );
+            <br>
 
+            Total:
+            <b>
+              ${money(
+                route.true_total_cost
+              )}
+            </b>
 
-              grouped[name].push(
+            <br>
 
-                `${esc(
-                  product?.name ||
-                  ('Product ' + x.product_id)
-                )} — ${money(
-                  x.extended_price
-                )}`
+            Distance:
+            ${Number(
+              route.distance_miles || 0
+            ).toFixed(1)}
+            miles
 
-              );
-
-            }
-          );
-
-
-          return `
-
-            <div class="store ${
-              selectedRoute
-                ? 'winner'
-                : ''
-            }">
-
-              <h3>
-
-                ${esc(
-                  r.name ||
-                  r.store_ids.join(' + ')
-                )}
-
-                ${
-                  r.complete
-
-                    ? '<span class="pill">COMPLETE</span>'
-
-                    : '<span class="pill">PARTIAL</span>'
-                }
-
-              </h3>
+          </p>
 
 
-              <p>
+          ${
+            route.complete
 
-                Known groceries:
-                <b>
-                  ${money(r.food_cost)}
-                </b>
+              ? `
+                <span class="pill">
+                  COMPLETE
+                </span>
+              `
 
-                ·
-
-                Gas:
-                <b>
-                  ${money(r.fuel_cost)}
-                </b>
-
-                ·
-
-                Trip total:
-                <b>
-                  ${money(r.true_total_cost)}
-                </b>
-
-                ·
-
-                ${Number(
-                  r.distance_miles
-                ).toFixed(1)}
-                mi
-
-              </p>
+              : `
+                <span class="pill">
+                  MISSING PRICES
+                </span>
+              `
+          }
 
 
-              <h4>
-                What to buy where
-              </h4>
+          ${
+            route.missing_items &&
+            route.missing_items.length
+
+              ? `
+
+                <p class="missing">
+
+                  Missing:
+
+                  ${
+                    route.missing_items
+                      .map(
+                        m => {
+
+                          const p =
+                            chosen.find(
+                              product =>
+                                Number(product.id) ===
+                                Number(m.product_id)
+                            );
 
 
-              ${
-                Object.entries(grouped)
-                  .map(
-                    ([storeName,arr]) =>
-                      `
-                        <p>
-                          <b>
-                            ${esc(storeName)}
-                          </b>
-                          <br>
-                          ${arr.join('<br>')}
-                        </p>
-                      `
-                  )
-                  .join('')
-              }
+                          return esc(
+                            p
+                              ? p.name
+                              : `Product ${m.product_id}`
+                          );
+
+                        }
+                      )
+                      .join(', ')
+
+                  }
+
+                </p>
+
+              `
+
+              : ''
+          }
+
+        </div>
+
+      `;
+
+    });
 
 
-              ${
-                missing.length
+    html += `
 
-                  ? `
+      </div>
 
-                    <h4 class="missing">
-                      Prices not found
-                    </h4>
-
-                    ${
-                      missing
-                        .map(
-                          m => {
-
-                            const p =
-                              chosen.find(
-                                x =>
-                                  Number(x.id) ===
-                                  Number(m.product_id)
-                              );
-
-                            return `
-
-                              <div class="missing">
-
-                                ${esc(
-                                  p?.name ||
-                                  ('Product ' +
-                                   m.product_id)
-                                )}
-
-                              </div>
-
-                            `;
-
-                          }
-                        )
-                        .join('')
-                    }
-
-                  `
-
-                  : ''
-              }
-
-            </div>
-
-          `;
-
-        }
-      ).join('');
+    `;
 
 
     results.innerHTML =
@@ -1899,12 +1968,17 @@ async function optimize(){
 
 
     msg.textContent =
-      `Checked ${chosen.length} selected products across ${stores.length} stores. Prices in this result come from the SmartBasket database.`;
+      `Done. Compared ${chosen.length} selected product${
+        chosen.length === 1
+          ? ''
+          : 's'
+      } across ${stores.length} stores.`;
 
 
   }catch(error){
 
     console.error(
+      'OPTIMIZER ERROR:',
       error
     );
 
@@ -1913,16 +1987,20 @@ async function optimize(){
 
       <div class="store">
 
-        <b class="error">
-          Could not calculate
-          the shopping plan.
-        </b>
+        <h3 class="error">
+          Shopping calculation failed
+        </h3>
 
-        <p class="muted">
+        <p class="error">
           ${esc(
             error.message ||
             String(error)
           )}
+        </p>
+
+        <p class="muted">
+          Open the browser console with F12
+          if you need the technical error.
         </p>
 
       </div>
@@ -1931,7 +2009,7 @@ async function optimize(){
 
 
     msg.textContent =
-      'Shopping plan error.';
+      'Shopping plan failed.';
 
   }
 
