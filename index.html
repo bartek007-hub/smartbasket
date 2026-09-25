@@ -20,7 +20,7 @@ header{
 }
 
 main{
-  max-width:1000px;
+  max-width:1100px;
   margin:20px auto;
   padding:0 14px
 }
@@ -44,18 +44,9 @@ button{
   margin-right:6px
 }
 
-button:hover{
-  background:#0d58c7
-}
-
 button.secondary{
   background:#e9eef7;
   color:#20304b
-}
-
-button:disabled{
-  opacity:.6;
-  cursor:not-allowed
 }
 
 input{
@@ -79,11 +70,6 @@ input{
   padding:10px
 }
 
-.product input{
-  width:auto;
-  margin-right:8px
-}
-
 .store{
   border:1px solid #e1e6ee;
   border-radius:12px;
@@ -101,32 +87,36 @@ input{
   font-size:13px
 }
 
-.error{
-  color:#b42318;
-  background:#fff1f0;
-  border:1px solid #f5c2c0;
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px
-}
-
-.success{
-  color:#087f5b;
-  background:#f0fbf6;
-  border:1px solid #b7e4d3;
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px
-}
-
 .hidden{
   display:none
 }
 
-hr{
-  border:0;
-  border-top:1px solid #e1e6ee;
-  margin:12px 0
+.price{
+  font-weight:700
+}
+
+.missing{
+  color:#a15c00
+}
+
+.good{
+  color:#087f5b;
+  font-weight:700
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:10px
+}
+
+.pill{
+  display:inline-block;
+  background:#eef3fa;
+  padding:4px 8px;
+  border-radius:20px;
+  font-size:12px;
+  margin:2px
 }
 </style>
 </head>
@@ -145,30 +135,29 @@ hr{
   <h2>Sign in</h2>
 
   <p class="muted">
-    Sign in to use your SmartBasket database from any browser.
+    Sign in to use your SmartBasket database.
   </p>
 
-  <label>Email</label>
   <input
     id="email"
     type="email"
     placeholder="Email"
-    autocomplete="email"
   >
 
-  <label>Password</label>
   <input
     id="password"
     type="password"
     placeholder="Password"
-    autocomplete="current-password"
   >
 
-  <button id="signinBtn" type="button">
+  <button onclick="signin()">
     Sign in
   </button>
 
-  <button id="signupBtn" class="secondary" type="button">
+  <button
+    class="secondary"
+    onclick="signup()"
+  >
     Create account
   </button>
 
@@ -180,45 +169,60 @@ hr{
 <!-- APPLICATION -->
 <div id="app" class="hidden">
 
+  <!-- SHOPPING LIST -->
   <div class="card">
 
     <h2>Your Shopping List</h2>
 
     <p class="muted">
-      Select the products you want to compare.
-      SmartBasket uses the latest active prices in the database.
+      SmartBasket compares every tracked price.
+      Missing prices are shown instead of removing the product
+      from the calculation.
     </p>
 
-    <div id="products" class="products"></div>
+    <div
+      id="products"
+      class="products"
+    ></div>
 
     <br>
 
-    <button id="optimizeBtn" type="button">
-      Find Best Prices
+    <button onclick="optimize()">
+      Find Best Shopping Plan
     </button>
 
-    <button id="refreshBtn" class="secondary" type="button">
-      Refresh
+    <button
+      class="secondary"
+      onclick="load()"
+    >
+      Refresh Prices
     </button>
 
-    <p id="msg" class="muted"></p>
+    <p
+      id="msg"
+      class="muted"
+    ></p>
 
   </div>
 
 
+  <!-- RESULTS -->
   <div class="card">
 
     <h2>Results</h2>
 
     <div id="results">
+
       <p class="muted">
-        Select products and tap Find Best Prices.
+        Select products and tap Find Best Shopping Plan.
       </p>
+
     </div>
 
   </div>
 
 
+  <!-- TRIP SETTINGS -->
   <div class="card">
 
     <h3>Trip settings</h3>
@@ -234,7 +238,7 @@ hr{
     </p>
 
     <p class="muted">
-      Gas uses the current BJ's Stoughton regular price
+      Gas uses the latest BJ's Stoughton regular price
       minus the $0.10/gal member discount.
     </p>
 
@@ -245,104 +249,74 @@ hr{
 </main>
 
 
-<!-- IMPORTANT:
-     The package name MUST be lowercase:
-     @supabase/supabase-js
--->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 
 <script>
 
 /* =========================================================
-   SUPABASE CONNECTION
-   ========================================================= */
+   SUPABASE
+========================================================= */
 
-const SUPABASE_URL =
+const URL =
   'https://rwxsatmzflryqlgpvbzx.supabase.co';
 
-const SUPABASE_KEY =
+const KEY =
   'sb_publishable_Zkk1oLjNQaeNqhlTWizYvA_llZiGWXn';
 
-let db = null;
-
-
-/* =========================================================
-   INITIALIZE SUPABASE
-   ========================================================= */
-
-try {
-
-  if (
-    !window.supabase ||
-    !window.supabase.createClient
-  ) {
-
-    throw new Error(
-      'Supabase JavaScript library did not load.'
-    );
-
-  }
-
-  db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY,
-    {
-      auth:{
-        persistSession:true,
-        autoRefreshToken:true,
-        detectSessionInUrl:true
-      }
+const db = supabase.createClient(
+  URL,
+  KEY,
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true
     }
-  );
-
-}
-catch(error){
-
-  console.error(
-    'Supabase initialization error:',
-    error
-  );
-
-  document.getElementById('authmsg').innerHTML =
-    '<div class="error">' +
-    'SmartBasket could not load the login service. ' +
-    'Please refresh the page.' +
-    '</div>';
-
-}
+  }
+);
 
 
 /* =========================================================
-   APPLICATION VARIABLES
-   ========================================================= */
+   TRIP SETTINGS
+========================================================= */
+
+const HOME = {
+  lat:42.1298441,
+  lon:-71.1216529
+};
+
+const MPG = 25;
+
+/*
+   Stores within 0.5 miles of each other
+   are treated as one shopping area.
+*/
+const CLUSTER_MILES = 0.5;
+
+
+/* =========================================================
+   APPLICATION DATA
+========================================================= */
 
 let products = [];
 let stores = [];
 let prices = [];
 let selected = new Set();
-
-let fuel = 4.079;
+let fuel = null;
 
 
 /* =========================================================
    HELPERS
-   ========================================================= */
+========================================================= */
 
-const money = n => {
-
-  if(n == null || Number.isNaN(Number(n))){
-    return '—';
-  }
-
-  return '$' + Number(n).toFixed(2);
-
-};
+const money = n =>
+  n == null
+    ? '—'
+    : '$' + Number(n).toFixed(2);
 
 
-const esc = s => {
-
-  return String(s ?? '').replace(
+const esc = s =>
+  String(s ?? '').replace(
     /[&<>"']/g,
     c => ({
       '&':'&amp;',
@@ -353,250 +327,86 @@ const esc = s => {
     }[c])
   );
 
+
+/* =========================================================
+   DISTANCE CALCULATION
+========================================================= */
+
+const hav = (a,b) => {
+
+  const R = 3958.7613;
+
+  const r = Math.PI / 180;
+
+  const dLat =
+    (b.latitude - a.latitude) * r;
+
+  const dLon =
+    (b.longitude - a.longitude) * r;
+
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(a.latitude * r) *
+    Math.cos(b.latitude * r) *
+    Math.sin(dLon / 2) ** 2;
+
+  return (
+    2 *
+    R *
+    Math.asin(Math.sqrt(x))
+  );
 };
 
 
 /* =========================================================
-   LOGIN
-   ========================================================= */
+   AUTHENTICATION
+========================================================= */
 
 async function signin(){
 
-  const msg =
-    document.getElementById('authmsg');
+  const {error} =
+    await db.auth.signInWithPassword({
+      email:email.value,
+      password:password.value
+    });
 
-  const emailInput =
-    document.getElementById('email');
+  authmsg.textContent =
+    error ? error.message : '';
 
-  const passwordInput =
-    document.getElementById('password');
+  if(!error){
 
-  const button =
-    document.getElementById('signinBtn');
-
-
-  if(!db){
-
-    msg.innerHTML =
-      '<div class="error">' +
-      'The Supabase login service is not loaded. ' +
-      'Please refresh the page.' +
-      '</div>';
-
-    return;
+    start();
 
   }
-
-
-  const email =
-    emailInput.value.trim();
-
-  const password =
-    passwordInput.value;
-
-
-  if(!email){
-
-    msg.innerHTML =
-      '<div class="error">' +
-      'Please enter your email address.' +
-      '</div>';
-
-    emailInput.focus();
-
-    return;
-
-  }
-
-
-  if(!password){
-
-    msg.innerHTML =
-      '<div class="error">' +
-      'Please enter your password.' +
-      '</div>';
-
-    passwordInput.focus();
-
-    return;
-
-  }
-
-
-  button.disabled = true;
-
-  button.textContent =
-    'Signing in...';
-
-  msg.innerHTML =
-    '<div class="muted">Connecting to SmartBasket...</div>';
-
-
-  try{
-
-    const response =
-      await db.auth.signInWithPassword({
-        email:email,
-        password:password
-      });
-
-
-    if(response.error){
-
-      console.error(
-        'Supabase login error:',
-        response.error
-      );
-
-      msg.innerHTML =
-        '<div class="error">' +
-        esc(response.error.message) +
-        '</div>';
-
-      button.disabled = false;
-
-      button.textContent =
-        'Sign in';
-
-      return;
-
-    }
-
-
-    msg.innerHTML =
-      '<div class="success">' +
-      'Login successful.' +
-      '</div>';
-
-
-    await start();
-
-  }
-  catch(error){
-
-    console.error(
-      'Login exception:',
-      error
-    );
-
-    msg.innerHTML =
-      '<div class="error">' +
-      'Login error: ' +
-      esc(error?.message || error) +
-      '</div>';
-
-  }
-
-
-  button.disabled = false;
-
-  button.textContent =
-    'Sign in';
 
 }
 
 
-/* =========================================================
-   CREATE ACCOUNT
-   ========================================================= */
-
 async function signup(){
 
-  const msg =
-    document.getElementById('authmsg');
+  const {error} =
+    await db.auth.signUp({
+      email:email.value,
+      password:password.value
+    });
 
-  const email =
-    document.getElementById('email').value.trim();
-
-  const password =
-    document.getElementById('password').value;
-
-
-  if(!db){
-
-    msg.innerHTML =
-      '<div class="error">' +
-      'The Supabase login service is not loaded.' +
-      '</div>';
-
-    return;
-
-  }
-
-
-  if(!email || !password){
-
-    msg.innerHTML =
-      '<div class="error">' +
-      'Enter an email and password first.' +
-      '</div>';
-
-    return;
-
-  }
-
-
-  try{
-
-    const response =
-      await db.auth.signUp({
-        email:email,
-        password:password
-      });
-
-
-    if(response.error){
-
-      msg.innerHTML =
-        '<div class="error">' +
-        esc(response.error.message) +
-        '</div>';
-
-      return;
-
-    }
-
-
-    msg.innerHTML =
-      '<div class="success">' +
-      'Account created. ' +
-      'Check your email if confirmation is required.' +
-      '</div>';
-
-  }
-  catch(error){
-
-    console.error(
-      'Signup error:',
-      error
-    );
-
-    msg.innerHTML =
-      '<div class="error">' +
-      esc(error?.message || error) +
-      '</div>';
-
-  }
+  authmsg.textContent =
+    error
+      ? error.message
+      : 'Account created. Check your email if confirmation is required.';
 
 }
 
 
 /* =========================================================
    START APPLICATION
-   ========================================================= */
+========================================================= */
 
 async function start(){
 
-  document
-    .getElementById('login')
-    .classList
-    .add('hidden');
+  login.classList.add('hidden');
 
-  document
-    .getElementById('app')
-    .classList
-    .remove('hidden');
-
+  app.classList.remove('hidden');
 
   await load();
 
@@ -604,195 +414,121 @@ async function start(){
 
 
 /* =========================================================
-   LOAD DATABASE
-   ========================================================= */
+   LOAD DATABASE DATA
+========================================================= */
 
 async function load(){
 
-  const msg =
-    document.getElementById('msg');
+  msg.textContent =
+    'Loading latest tracked prices...';
+
+
+  const [
+    p,
+    s,
+    sp,
+    f
+  ] = await Promise.all([
+
+    db
+      .from('products')
+      .select('*')
+      .order('name'),
+
+    db
+      .from('stores')
+      .select('*')
+      .eq('is_active',true)
+      .order('name'),
+
+    db
+      .from('store_products')
+      .select('*')
+      .eq('is_active',true),
+
+    db
+      .from('fuel_prices')
+      .select('*')
+      .eq('store_id',2)
+      .eq('fuel_type','regular')
+      .order('observed_at',{
+        ascending:false
+      })
+      .limit(1)
+
+  ]);
+
+
+  if(
+    p.error ||
+    s.error ||
+    sp.error
+  ){
+
+    msg.textContent =
+      'Could not load SmartBasket data. Check Supabase permissions.';
+
+    return;
+
+  }
+
+
+  products = p.data || [];
+
+  stores = s.data || [];
+
+  prices = sp.data || [];
+
+  fuel =
+    f.data?.[0]
+      ? Number(
+          f.data[0].price_per_gallon
+        )
+      : null;
+
+
+  /*
+     Rebuild product selection list.
+  */
+
+  document.getElementById(
+    'products'
+  ).innerHTML =
+
+    products.map(x =>
+
+      `
+      <label class="product">
+
+        <input
+          type="checkbox"
+          ${selected.has(x.id) ? 'checked' : ''}
+          onchange="toggle(${x.id})"
+        >
+
+        <b>${esc(x.name)}</b>
+
+        <br>
+
+        <span class="muted">
+          ${esc(x.category || '')}
+        </span>
+
+      </label>
+      `
+
+    ).join('');
 
 
   msg.textContent =
-    'Loading SmartBasket data...';
-
-
-  try{
-
-    const [
-      p,
-      s,
-      sp,
-      f
-    ] = await Promise.all([
-
-      db
-        .from('products')
-        .select('*')
-        .order('name'),
-
-      db
-        .from('stores')
-        .select('*')
-        .eq('is_active',true)
-        .order('name'),
-
-      db
-        .from('store_products')
-        .select('*')
-        .eq('is_active',true),
-
-      db
-        .from('fuel_prices')
-        .select('*')
-        .eq('store_id',2)
-        .eq('fuel_type','regular')
-        .order('observed_at',{
-          ascending:false
-        })
-        .limit(1)
-
-    ]);
-
-
-    if(p.error){
-
-      throw new Error(
-        'Products: ' + p.error.message
-      );
-
-    }
-
-
-    if(s.error){
-
-      throw new Error(
-        'Stores: ' + s.error.message
-      );
-
-    }
-
-
-    if(sp.error){
-
-      throw new Error(
-        'Prices: ' + sp.error.message
-      );
-
-    }
-
-
-    if(f.error){
-
-      console.warn(
-        'Fuel price error:',
-        f.error
-      );
-
-    }
-
-
-    products =
-      p.data || [];
-
-    stores =
-      s.data || [];
-
-    prices =
-      sp.data || [];
-
-
-    if(
-      f.data &&
-      f.data.length > 0
-    ){
-
-      fuel =
-        Number(
-          f.data[0].price_per_gallon
-        );
-
-    }
-
-
-    document
-      .getElementById('products')
-      .innerHTML =
-
-      products.map(product => {
-
-        return `
-          <label class="product">
-
-            <input
-              type="checkbox"
-              data-product-id="${product.id}"
-            >
-
-            <b>
-              ${esc(product.name)}
-            </b>
-
-            <br>
-
-            <span class="muted">
-              ${esc(product.category || '')}
-            </span>
-
-          </label>
-        `;
-
-      }).join('');
-
-
-    document
-      .querySelectorAll(
-        '[data-product-id]'
-      )
-      .forEach(checkbox => {
-
-        checkbox.addEventListener(
-          'change',
-          function(){
-
-            toggle(
-              Number(
-                this.dataset.productId
-              )
-            );
-
-          }
-        );
-
-      });
-
-
-    msg.textContent =
-      products.length +
-      ' products loaded from SmartBasket.';
-
-
-  }
-  catch(error){
-
-    console.error(
-      'Database loading error:',
-      error
-    );
-
-    msg.innerHTML =
-      '<div class="error">' +
-      esc(error?.message || error) +
-      '</div>';
-
-  }
+    `Loaded ${prices.length} tracked store prices across ${stores.length} stores.`;
 
 }
 
 
 /* =========================================================
    PRODUCT SELECTION
-   ========================================================= */
+========================================================= */
 
 function toggle(id){
 
@@ -800,8 +536,7 @@ function toggle(id){
 
     selected.delete(id);
 
-  }
-  else{
+  }else{
 
     selected.add(id);
 
@@ -811,40 +546,86 @@ function toggle(id){
 
 
 /* =========================================================
-   CALCULATE STORE ROUTE
-   ========================================================= */
+   CREATE NEARBY STORE GROUPS
+========================================================= */
 
-async function route(st){
+function clusters(){
+
+  const remaining = [...stores];
+
+  const out = [];
+
+
+  while(remaining.length){
+
+    const seed =
+      remaining.shift();
+
+    const c = [seed];
+
+
+    for(
+      let i = remaining.length - 1;
+      i >= 0;
+      i--
+    ){
+
+      if(
+        hav(
+          seed,
+          remaining[i]
+        ) <= CLUSTER_MILES
+      ){
+
+        c.push(
+          remaining.splice(i,1)[0]
+        );
+
+      }
+
+    }
+
+
+    out.push(c);
+
+  }
+
+
+  return out;
+
+}
+
+
+/* =========================================================
+   ROUTE CALCULATION
+========================================================= */
+
+async function route(cluster){
 
   try{
 
-    const sessionResponse =
-      await db.auth.getSession();
-
     const session =
-      sessionResponse.data.session;
+      (
+        await db.auth.getSession()
+      ).data.session;
 
 
     if(!session){
-
-      console.error(
-        'No authenticated session.'
-      );
 
       return null;
 
     }
 
 
-    const response =
+    const r =
       await fetch(
-        SUPABASE_URL +
+        URL +
         '/functions/v1/calculate-store-routes',
         {
           method:'POST',
 
           headers:{
-            'Authorization':
+            Authorization:
               'Bearer ' +
               session.access_token,
 
@@ -852,69 +633,64 @@ async function route(st){
               'application/json'
           },
 
-          body:JSON.stringify({
+          body:
+            JSON.stringify({
 
-            home_address:
-              '513 Canton Street, Stoughton, MA 02072',
+              home:HOME,
 
-            stores:[{
+              stores:
+                cluster.map(st => ({
 
-              id:String(st.id),
+                  id:String(st.id),
 
-              latitude:
-                Number(st.latitude),
+                  latitude:
+                    Number(st.latitude),
 
-              longitude:
-                Number(st.longitude)
+                  longitude:
+                    Number(st.longitude)
 
-            }]
+                }))
 
-          })
+            })
 
         }
       );
 
 
-    if(!response.ok){
-
-      console.error(
-        'Route request failed:',
-        response.status
-      );
+    if(!r.ok){
 
       return null;
 
     }
 
 
-    const data =
-      await response.json();
+    const j =
+      await r.json();
 
 
-    const result =
-      data.results?.[0] ||
-      data.routes?.[0];
+    return j.ok
+      ? {
+          miles:Number(j.miles),
+
+          minutes:
+            Number(
+              j.duration_minutes
+            ),
+
+          store_ids:
+            j.store_ids ||
+            cluster.map(
+              x => String(x.id)
+            )
+        }
+      : null;
 
 
-    if(!result){
-
-      return null;
-
-    }
-
-
-    return Number(
-      result.round_trip_miles ??
-      result.miles ??
-      result.distance_miles
-    );
-
-  }
-  catch(error){
+  }catch(e){
 
     console.error(
       'Route error:',
-      error
+      e
     );
 
     return null;
@@ -925,481 +701,525 @@ async function route(st){
 
 
 /* =========================================================
-   OPTIMIZE SHOPPING
-   ========================================================= */
+   FIND PRODUCT PRICE AT STORE
+========================================================= */
+
+function priceFor(
+  productId,
+  storeId
+){
+
+  return prices.find(
+    x =>
+      Number(x.product_id) ===
+        Number(productId) &&
+
+      Number(x.store_id) ===
+        Number(storeId)
+  ) || null;
+
+}
+
+
+/* =========================================================
+   CHOOSE CHEAPEST STORE FOR EACH PRODUCT
+========================================================= */
+
+function chooseProducts(
+  chosen,
+  cluster
+){
+
+  return chosen.map(p => {
+
+    const options =
+      cluster
+
+        .map(st => ({
+
+          st,
+
+          row:
+            priceFor(
+              p.id,
+              st.id
+            )
+
+        }))
+
+        .filter(
+          x =>
+            x.row &&
+            x.row.current_price != null
+        )
+
+        .sort(
+          (a,b) =>
+            Number(
+              a.row.current_price
+            ) -
+            Number(
+              b.row.current_price
+            )
+        );
+
+
+    return {
+
+      product:p,
+
+      choice:
+        options[0] || null
+
+    };
+
+  });
+
+}
+
+
+/* =========================================================
+   BUILD PLAN
+========================================================= */
+
+function renderPlan(
+  name,
+  items,
+  rt
+){
+
+  const known =
+    items.filter(
+      x => x.choice
+    );
+
+
+  const missing =
+    items.filter(
+      x => !x.choice
+    );
+
+
+  const food =
+    known.reduce(
+      (a,x) =>
+        a +
+        Number(
+          x.choice.row.current_price
+        ),
+      0
+    );
+
+
+  /*
+     Gas calculation:
+
+     round-trip miles
+     ÷ MPG
+     × gas price
+  */
+
+  const gas =
+    rt && fuel != null
+
+      ? (
+          rt.miles /
+          MPG
+        ) *
+        Math.max(
+          0,
+          fuel - 0.10
+        )
+
+      : null;
+
+
+  const total =
+    gas == null
+      ? null
+      : food + gas;
+
+
+  /*
+     Group products by store.
+  */
+
+  const byStore = {};
+
+
+  known.forEach(x => {
+
+    const storeName =
+      x.choice.st.name;
+
+
+    if(
+      !byStore[storeName]
+    ){
+
+      byStore[storeName] = [];
+
+    }
+
+
+    byStore[storeName].push(x);
+
+  });
+
+
+  return {
+
+    name,
+
+    items,
+
+    known,
+
+    missing,
+
+    food,
+
+    gas,
+
+    total,
+
+    rt,
+
+    byStore,
+
+    complete:
+      missing.length === 0 &&
+      !!rt
+
+  };
+
+}
+
+
+/* =========================================================
+   MAIN SHOPPING OPTIMIZER
+========================================================= */
 
 async function optimize(){
 
-  const msg =
-    document.getElementById('msg');
-
-  const results =
-    document.getElementById('results');
-
-  const button =
-    document.getElementById('optimizeBtn');
-
-
   if(!selected.size){
 
-    msg.innerHTML =
-      '<div class="error">' +
-      'Select at least one product first.' +
-      '</div>';
+    msg.textContent =
+      'Select at least one product first.';
 
     return;
 
   }
 
 
-  button.disabled = true;
-
-  button.textContent =
-    'Calculating...';
-
-
   results.innerHTML =
-    '<p>Calculating groceries, routes and gas...</p>';
+    '<p>Calculating product prices, nearby-store groups, routes and gas...</p>';
 
 
   const chosen =
     products.filter(
-      p => selected.has(p.id)
+      p =>
+        selected.has(p.id)
     );
 
 
-  const output = [];
+  const plans = [];
 
 
-  for(const store of stores){
+  /*
+     Evaluate each nearby-store cluster.
+  */
 
-    const rows =
-      chosen.map(product =>
+  for(
+    const cluster of clusters()
+  ){
 
-        prices.find(price =>
-
-          Number(price.product_id) ===
-          Number(product.id)
-
-          &&
-
-          Number(price.store_id) ===
-          Number(store.id)
-
-        )
-
+    const items =
+      chooseProducts(
+        chosen,
+        cluster
       );
 
 
-    const complete =
-      rows.every(Boolean);
+    const rt =
+      await route(cluster);
 
 
-    let subtotal = null;
+    plans.push(
+      renderPlan(
+        cluster
+          .map(x => x.name)
+          .join(' + '),
 
+        items,
 
-    if(complete){
-
-      subtotal =
-        rows.reduce(
-          (sum,row) =>
-            sum +
-            Number(row.current_price || 0),
-          0
-        );
-
-    }
-
-
-    let miles = null;
-
-
-    if(complete){
-
-      miles =
-        await route(store);
-
-    }
-
-
-    let gas = null;
-
-
-    if(miles != null){
-
-      gas =
-        (miles / 25) *
-        (fuel - 0.10);
-
-    }
-
-
-    let total = null;
-
-
-    if(
-      subtotal != null &&
-      gas != null
-    ){
-
-      total =
-        subtotal + gas;
-
-    }
-
-
-    output.push({
-
-      store,
-      rows,
-      complete,
-      miles,
-      gas,
-      total,
-      subtotal
-
-    });
-
-  }
-
-
-  const viable =
-    output
-      .filter(
-        x =>
-          x.complete &&
-          x.total != null
+        rt
       )
-      .sort(
-        (a,b) =>
-          a.total - b.total
-      );
-
-
-  const winner =
-    viable[0];
-
-
-  if(winner){
-
-    results.innerHTML = `
-
-      <div class="winner store">
-
-        <h3>
-          Lowest complete basket including gas
-        </h3>
-
-        <b>
-          ${esc(winner.store.name)}
-        </b>
-
-        <br><br>
-
-        Food:
-        <b>${money(winner.subtotal)}</b>
-
-        <br>
-
-        Gas:
-        <b>${money(winner.gas)}</b>
-
-        <br><br>
-
-        Total trip cost:
-        <b>${money(winner.total)}</b>
-
-      </div>
-
-    `;
-
-  }
-  else{
-
-    results.innerHTML = `
-
-      <div class="store">
-
-        <b>
-          No complete store is currently
-          available with a verified route.
-        </b>
-
-      </div>
-
-    `;
+    );
 
   }
 
 
-  results.innerHTML +=
-
-    output.map(item => {
-
-      const missing =
-        chosen
-          .filter(
-            (product,index) =>
-              !item.rows[index]
-          );
-
-
-      return `
-
-        <div class="store">
-
-          <h3>
-            ${esc(item.store.name)}
-          </h3>
-
-
-          ${chosen.map(
-            (product,index) => {
-
-              const row =
-                item.rows[index];
-
-
-              if(!row){
-
-                return `
-
-                  <div class="muted">
-
-                    Price still needed:
-                    ${esc(product.name)}
-
-                  </div>
-
-                `;
-
-              }
-
-
-              const packageInfo =
-                row.package_quantity
-                  ? `${esc(
-                      row.package_quantity +
-                      ' ' +
-                      (row.package_unit || '')
-                    )}`
-                  : '';
-
-
-              return `
-
-                <div>
-
-                  ${esc(product.name)}
-                  —
-                  ${money(row.current_price)}
-
-                  ${packageInfo
-                    ? ` (${packageInfo})`
-                    : ''}
-
-                </div>
-
-              `;
-
-            }
-
-          ).join('')}
-
-
-          ${
-            item.complete
-
-            ?
-
-            `
-
-              <hr>
-
-              <div>
-                Groceries:
-                <b>
-                  ${money(item.subtotal)}
-                </b>
-              </div>
-
-              <div>
-                Round trip:
-                ${
-                  item.miles == null
-                    ? '—'
-                    : item.miles.toFixed(1) +
-                      ' miles'
-                }
-              </div>
-
-              <div>
-                Gas:
-                <b>
-                  ${money(item.gas)}
-                </b>
-              </div>
-
-              <div>
-                Total trip:
-                <b>
-                  ${money(item.total)}
-                </b>
-              </div>
-
-              ${
-                winner &&
-                item.total != null &&
-                item.store.id !== winner.store.id
-
-                ?
-
-                `<p class="muted">
-                  ${money(
-                    item.total -
-                    winner.total
-                  )}
-                  more than the lowest
-                  complete basket.
-                </p>`
-
-                :
-
-                ''
-              }
-
-            `
-
-            :
-
-            `
-
-              <p class="muted">
-                Incomplete basket —
-                not eligible to win.
-              </p>
-
-            `
-
-          }
-
-        </div>
-
-      `;
-
-    }).join('');
-
-
-  msg.textContent =
-    'Comparison complete.';
-
-
-  button.disabled = false;
-
-  button.textContent =
-    'Find Best Prices';
-
-}
-
-
-/* =========================================================
-   BUTTON EVENTS
-   ========================================================= */
-
-document
-  .getElementById('signinBtn')
-  .addEventListener(
-    'click',
-    signin
-  );
-
-
-document
-  .getElementById('signupBtn')
-  .addEventListener(
-    'click',
-    signup
-  );
-
-
-document
-  .getElementById('optimizeBtn')
-  .addEventListener(
-    'click',
-    optimize
-  );
-
-
-document
-  .getElementById('refreshBtn')
-  .addEventListener(
-    'click',
-    load
-  );
-
-
-/* =========================================================
-   ENTER KEY LOGIN
-   ========================================================= */
-
-document
-  .getElementById('password')
-  .addEventListener(
-    'keydown',
-    function(event){
-
-      if(event.key === 'Enter'){
-
-        signin();
+  /*
+     Complete plans first.
+     Then lowest known total.
+  */
+
+  plans.sort(
+    (a,b) => {
+
+      if(
+        a.complete !==
+        b.complete
+      ){
+
+        return a.complete
+          ? -1
+          : 1;
 
       }
 
+
+      return (
+        a.total ?? Infinity
+      ) -
+      (
+        b.total ?? Infinity
+      );
+
     }
   );
 
 
-/* =========================================================
-   AUTOMATIC SESSION CHECK
-   ========================================================= */
-
-async function checkExistingSession(){
-
-  if(!db){
-
-    return;
-
-  }
-
-
-  try{
-
-    const response =
-      await db.auth.getSession();
-
-
-    if(
-      response.data &&
-      response.data.session
-    ){
-
-      await start();
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      'Session check error:',
-      error
+  const winner =
+    plans.find(
+      x => x.complete
     );
 
-  }
+
+  let html =
+    winner
+
+      ? `
+        <div class="winner store">
+
+          <h3>
+            Lowest complete plan
+          </h3>
+
+          <b>
+            ${esc(winner.name)}
+          </b>
+
+          <p>
+            Groceries:
+            ${money(winner.food)}
+            +
+            Gas:
+            ${money(winner.gas)}
+            =
+            <b>
+              ${money(winner.total)}
+            </b>
+          </p>
+
+          <p>
+            Round trip:
+            ${winner.rt.miles.toFixed(1)}
+            miles
+
+            (${winner.rt.minutes.toFixed(0)}
+            min)
+          </p>
+
+        </div>
+        `
+
+      :
+
+        `
+        <div class="store">
+
+          <b>
+            No complete plan has a verified route yet.
+          </b>
+
+          <p class="muted">
+            Partial plans are still shown below.
+            Products without tracked prices are listed
+            as missing instead of being ignored.
+          </p>
+
+        </div>
+        `;
+
+
+  /*
+     Display every plan.
+  */
+
+  html +=
+
+    plans.map(
+      p =>
+
+        `
+        <div
+          class="store
+          ${winner === p ? 'winner' : ''}"
+        >
+
+          <h3>
+
+            ${esc(p.name)}
+
+            ${
+              p.complete
+
+                ? '<span class="pill">COMPLETE</span>'
+
+                : '<span class="pill">PARTIAL</span>'
+            }
+
+          </h3>
+
+
+          <p>
+
+            Known grocery total:
+
+            <b>
+              ${money(p.food)}
+            </b>
+
+            ${
+              p.rt
+
+                ? `
+                  · Round trip:
+                  ${p.rt.miles.toFixed(1)}
+                  mi
+
+                  · Gas:
+                  ${money(p.gas)}
+
+                  · Known trip total:
+                  <b>
+                    ${money(p.total)}
+                  </b>
+                  `
+
+                : ' · Route: —'
+            }
+
+          </p>
+
+
+          <h4>
+            What to buy where
+          </h4>
+
+
+          ${
+            Object.entries(
+              p.byStore
+            )
+
+            .map(
+              ([store,arr]) =>
+
+                `
+                <p>
+
+                  <b>
+                    ${esc(store)}
+                  </b>
+
+                  <br>
+
+                  ${
+                    arr
+                      .map(
+                        x =>
+                          `
+                          ${esc(
+                            x.product.name
+                          )}
+                          —
+                          ${money(
+                            x.choice.row.current_price
+                          )}
+                          `
+                      )
+                      .join('<br>')
+                  }
+
+                </p>
+                `
+            )
+
+            .join('')
+          }
+
+
+          ${
+            p.missing.length
+
+              ? `
+                <h4 class="missing">
+                  Prices not found
+                </h4>
+
+                ${
+                  p.missing
+                    .map(
+                      x =>
+                        `
+                        <div class="missing">
+
+                          ${esc(
+                            x.product.name
+                          )}
+
+                        </div>
+                        `
+                    )
+                    .join('')
+                }
+                `
+
+              : ''
+          }
+
+
+        </div>
+        `
+
+    )
+
+    .join('');
+
+
+  results.innerHTML =
+    html;
 
 }
 
 
-checkExistingSession();
+/* =========================================================
+   AUTOMATIC LOGIN CHECK
+========================================================= */
+
+db.auth.getSession()
+  .then(({data}) => {
+
+    if(data.session){
+
+      start();
+
+    }
+
+  });
 
 </script>
 
