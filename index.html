@@ -217,10 +217,6 @@ textarea{
 
 <main>
 
-<!-- =========================
-     LOGIN
-========================= -->
-
 <div id="login" class="card">
 
   <h2>Sign in</h2>
@@ -269,29 +265,18 @@ textarea{
 </div>
 
 
-<!-- =========================
-     APPLICATION
-========================= -->
-
 <div id="app" class="hidden">
-
-  <!-- SHOPPING LIST -->
 
   <div class="card">
 
     <h2>Your Shopping List</h2>
 
     <p class="muted">
-      SmartBasket compares tracked prices across stores.
+      SmartBasket compares prices across all tracked stores.
       Products with missing prices remain on the list and are shown as missing.
     </p>
 
     <div id="products" class="products"></div>
-
-
-    <!-- =========================
-         ADD PRODUCT
-    ========================= -->
 
     <div class="add-product-box">
 
@@ -299,7 +284,8 @@ textarea{
 
       <p class="muted">
         Add something that is not currently in the SmartBasket list.
-        It will be added to your shopping list and included when SmartBasket searches for prices.
+        It will be saved to your SmartBasket database and SmartBasket
+        will immediately search the tracked stores for a price.
       </p>
 
       <div class="add-product-row">
@@ -324,7 +310,6 @@ textarea{
 
     </div>
 
-
     <br>
 
     <button
@@ -347,10 +332,6 @@ textarea{
   </div>
 
 
-  <!-- =========================
-       RESULTS
-  ========================= -->
-
   <div class="card">
 
     <h2>Results</h2>
@@ -365,10 +346,6 @@ textarea{
 
   </div>
 
-
-  <!-- =========================
-       TRIP SETTINGS
-  ========================= -->
 
   <div class="card">
 
@@ -396,16 +373,9 @@ textarea{
 </main>
 
 
-<!-- SUPABASE -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
 <script>
-
-/* ============================================================
-   SUPABASE CONNECTION
-============================================================ */
 
 const SUPABASE_URL =
   'https://rwxsatmzflryqlgpvbzx.supabase.co';
@@ -426,23 +396,14 @@ const db = supabase.createClient(
 );
 
 
-/* ============================================================
-   SETTINGS
-============================================================ */
-
 const HOME = {
   lat:42.1298441,
   lon:-71.1216529
 };
 
 const MPG = 25;
-
 const CLUSTER_MILES = 0.5;
 
-
-/* ============================================================
-   GLOBAL DATA
-============================================================ */
 
 let products = [];
 let stores = [];
@@ -451,22 +412,18 @@ let selected = new Set();
 let fuel = null;
 
 
-/* ============================================================
-   ELEMENT HELPERS
-============================================================ */
-
 function el(id){
   return document.getElementById(id);
 }
 
 
-/* ============================================================
-   FORMATTING
-============================================================ */
-
 const money = n => {
 
-  if(n === null || n === undefined || isNaN(Number(n))){
+  if(
+    n === null ||
+    n === undefined ||
+    isNaN(Number(n))
+  ){
     return '—';
   }
 
@@ -489,14 +446,9 @@ function esc(s){
 }
 
 
-/* ============================================================
-   DISTANCE
-============================================================ */
-
 function hav(a,b){
 
   const R = 3958.7613;
-
   const r = Math.PI / 180;
 
   const dLat =
@@ -540,7 +492,8 @@ async function signin(){
     authmsgEl.textContent =
       'Please enter your email address.';
 
-    authmsgEl.className = 'error';
+    authmsgEl.className =
+      'error';
 
     return;
   }
@@ -550,7 +503,8 @@ async function signin(){
     authmsgEl.textContent =
       'Please enter your password.';
 
-    authmsgEl.className = 'error';
+    authmsgEl.className =
+      'error';
 
     return;
   }
@@ -588,8 +542,7 @@ async function signin(){
       return;
     }
 
-    authmsgEl.textContent =
-      '';
+    authmsgEl.textContent = '';
 
     await start();
 
@@ -598,7 +551,8 @@ async function signin(){
     console.error(error);
 
     authmsgEl.textContent =
-      'Login error: ' + (error.message || error);
+      'Login error: ' +
+      (error.message || error);
 
     authmsgEl.className =
       'error';
@@ -674,10 +628,10 @@ async function signup(){
 
     }
 
-    if(data?.session){
+    if(data.session){
 
       authmsgEl.textContent =
-        'Account created. Signing you in...';
+        'Account created.';
 
       authmsgEl.className =
         'success';
@@ -699,7 +653,7 @@ async function signup(){
     console.error(error);
 
     authmsgEl.textContent =
-      'Account creation error: ' +
+      'Signup error: ' +
       (error.message || error);
 
     authmsgEl.className =
@@ -711,14 +665,27 @@ async function signup(){
 
 
 /* ============================================================
+   LOGOUT
+============================================================ */
+
+async function logout(){
+
+  await db.auth.signOut();
+
+}
+
+
+/* ============================================================
    START APPLICATION
 ============================================================ */
 
 async function start(){
 
-  el('login').classList.add('hidden');
+  el('login')
+    .classList.add('hidden');
 
-  el('app').classList.remove('hidden');
+  el('app')
+    .classList.remove('hidden');
 
   await load();
 
@@ -731,18 +698,19 @@ async function start(){
 
 async function load(){
 
-  const msg = el('msg');
+  const msg =
+    el('msg');
 
   msg.textContent =
-    'Loading latest tracked prices...';
+    'Loading SmartBasket data...';
 
   try{
 
     const [
-      p,
-      s,
-      sp,
-      f
+      productsResult,
+      storesResult,
+      pricesResult,
+      fuelResult
     ] = await Promise.all([
 
       db
@@ -754,7 +722,7 @@ async function load(){
         .from('stores')
         .select('*')
         .eq('is_active',true)
-        .order('name'),
+        .order('id'),
 
       db
         .from('store_products')
@@ -774,79 +742,49 @@ async function load(){
     ]);
 
 
-    if(p.error){
+    if(productsResult.error)
+      throw productsResult.error;
 
-      console.error('Products error:',p.error);
+    if(storesResult.error)
+      throw storesResult.error;
 
-      msg.textContent =
-        'Could not load products: ' +
-        p.error.message;
+    if(pricesResult.error)
+      throw pricesResult.error;
 
-      return;
-
-    }
-
-
-    if(s.error){
-
-      console.error('Stores error:',s.error);
-
-      msg.textContent =
-        'Could not load stores: ' +
-        s.error.message;
-
-      return;
-
-    }
-
-
-    if(sp.error){
-
-      console.error('Prices error:',sp.error);
-
-      msg.textContent =
-        'Could not load store prices: ' +
-        sp.error.message;
-
-      return;
-
-    }
+    if(fuelResult.error)
+      throw fuelResult.error;
 
 
     products =
-      p.data || [];
+      productsResult.data || [];
 
     stores =
-      s.data || [];
+      storesResult.data || [];
 
     prices =
-      sp.data || [];
-
+      pricesResult.data || [];
 
     fuel =
-      f.data?.[0]
-        ? Number(f.data[0].price_per_gallon)
+      fuelResult.data &&
+      fuelResult.data.length
+        ? Number(
+            fuelResult.data[0]
+              .price_per_gallon
+          )
         : null;
-
-
-    /*
-      Restore products added manually by the user.
-      These remain in localStorage because they may not
-      yet exist in the database.
-    */
-
-    restoreCustomProducts();
 
 
     renderProducts();
 
-
     msg.textContent =
-      `Loaded ${prices.length} tracked store prices across ${stores.length} stores.`;
+      `Loaded ${products.length} products, ${stores.length} stores and ${prices.length} store prices.`;
 
   }catch(error){
 
-    console.error(error);
+    console.error(
+      'Load error:',
+      error
+    );
 
     msg.textContent =
       'Could not load SmartBasket data: ' +
@@ -858,206 +796,17 @@ async function load(){
 
 
 /* ============================================================
-   RESTORE CUSTOM PRODUCTS
-============================================================ */
-
-function restoreCustomProducts(){
-
-  let custom = [];
-
-  try{
-
-    custom =
-      JSON.parse(
-        localStorage.getItem(
-          'smartbasket_custom_products'
-        ) || '[]'
-      );
-
-  }catch(error){
-
-    custom = [];
-
-  }
-
-
-  if(!Array.isArray(custom)){
-    custom = [];
-  }
-
-
-  /*
-    Put custom products at the end of the database
-    products.
-  */
-
-  for(const item of custom){
-
-    const exists =
-      products.some(
-        p =>
-          String(p.name).trim().toLowerCase() ===
-          String(item.name).trim().toLowerCase()
-      );
-
-    if(!exists){
-
-      products.push({
-
-        id:item.id,
-
-        name:item.name,
-
-        category:item.category ||
-          'Custom Product',
-
-        is_custom:true
-
-      });
-
-    }
-
-  }
-
-}
-
-
-/* ============================================================
-   SAVE CUSTOM PRODUCTS
-============================================================ */
-
-function saveCustomProducts(){
-
-  const custom =
-    products
-      .filter(p => p.is_custom)
-      .map(p => ({
-        id:p.id,
-        name:p.name,
-        category:p.category
-      }));
-
-  localStorage.setItem(
-    'smartbasket_custom_products',
-    JSON.stringify(custom)
-  );
-
-}
-
-
-/* ============================================================
-   ADD PRODUCT
-============================================================ */
-
-function addProduct(){
-
-  const input =
-    el('newProduct');
-
-  const addMsg =
-    el('addMsg');
-
-  const name =
-    input.value.trim();
-
-  addMsg.className =
-    'muted';
-
-  if(!name){
-
-    addMsg.textContent =
-      'Enter a product name first.';
-
-    return;
-
-  }
-
-
-  /*
-    Check whether the product already exists.
-  */
-
-  const existing =
-    products.find(
-      p =>
-        String(p.name).trim().toLowerCase() ===
-        name.toLowerCase()
-    );
-
-
-  if(existing){
-
-    selected.add(existing.id);
-
-    renderProducts();
-
-    addMsg.textContent =
-      `"${existing.name}" is already on your list and has been selected.`;
-
-    input.value = '';
-
-    return;
-
-  }
-
-
-  /*
-    Create a unique local ID.
-  */
-
-  const id =
-    'custom_' +
-    Date.now() +
-    '_' +
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-
-  const product = {
-
-    id:id,
-
-    name:name,
-
-    category:'Custom Product',
-
-    is_custom:true
-
-  };
-
-
-  products.push(product);
-
-  selected.add(id);
-
-  saveCustomProducts();
-
-  renderProducts();
-
-  input.value = '';
-
-  addMsg.textContent =
-    `"${name}" was added to your shopping list and selected for price searching.`;
-
-  addMsg.className =
-    'success';
-
-}
-
-
-/* ============================================================
    RENDER PRODUCTS
 ============================================================ */
 
 function renderProducts(){
 
-  const container =
+  const box =
     el('products');
 
   if(!products.length){
 
-    container.innerHTML =
+    box.innerHTML =
       '<p class="muted">No products found.</p>';
 
     return;
@@ -1065,42 +814,56 @@ function renderProducts(){
   }
 
 
-  container.innerHTML =
-    products.map(x => {
+  box.innerHTML =
+    products.map(product => {
 
       const checked =
-        selected.has(x.id)
-          ? 'checked'
-          : '';
+        selected.has(product.id);
 
-      const custom =
-        x.is_custom
-          ? '<span class="custom-label">ADDED</span>'
-          : '';
+      const productPrices =
+        prices.filter(
+          p =>
+            String(p.product_id) ===
+            String(product.id)
+        );
+
+
+      const available =
+        productPrices.length;
 
 
       return `
+        <div class="product">
 
-        <label class="product">
+          <label>
 
-          <input
-            type="checkbox"
-            ${checked}
-            onchange="toggleProduct('${String(x.id).replace(/'/g,"\\'")}')"
-          >
+            <input
+              type="checkbox"
+              ${checked ? 'checked' : ''}
+              onchange="toggleProduct(${Number(product.id)},this.checked)"
+            >
 
-          <b>${esc(x.name)}</b>
+            <b>${esc(product.name)}</b>
 
-          ${custom}
+          </label>
 
-          <br>
+          ${
+            product.category
+              ? `<div class="muted">${esc(product.category)}</div>`
+              : ''
+          }
 
-          <span class="muted">
-            ${esc(x.category || '')}
-          </span>
+          ${
+            available
+              ? `<div class="good">
+                   ${available} store price${available===1?'':'s'}
+                 </div>`
+              : `<div class="missing">
+                   Price not found yet
+                 </div>`
+          }
 
-        </label>
-
+        </div>
       `;
 
     }).join('');
@@ -1112,19 +875,164 @@ function renderProducts(){
    TOGGLE PRODUCT
 ============================================================ */
 
-function toggleProduct(id){
+function toggleProduct(id,on){
 
-  /*
-    IDs can be database numbers or custom strings.
-  */
-
-  if(selected.has(id)){
-
+  if(on)
+    selected.add(id);
+  else
     selected.delete(id);
 
-  }else{
+}
 
-    selected.add(id);
+
+/* ============================================================
+   ADD PRODUCT
+============================================================ */
+
+async function addProduct(){
+
+  const input =
+    el('newProduct');
+
+  const msg =
+    el('addMsg');
+
+  const name =
+    input.value.trim();
+
+  msg.className =
+    'muted';
+
+  if(!name){
+
+    msg.textContent =
+      'Enter a product name first.';
+
+    return;
+
+  }
+
+
+  msg.textContent =
+    'Adding product to SmartBasket...';
+
+
+  try{
+
+    const {
+      data:{
+        session
+      }
+    } =
+      await db.auth.getSession();
+
+
+    if(!session){
+
+      msg.textContent =
+        'Your session expired. Please sign in again.';
+
+      msg.className =
+        'error';
+
+      return;
+
+    }
+
+
+    const response =
+      await fetch(
+        SUPABASE_URL +
+        '/functions/v1/add-product',
+        {
+          method:'POST',
+
+          headers:{
+            Authorization:
+              'Bearer ' +
+              session.access_token,
+
+            'Content-Type':
+              'application/json'
+          },
+
+          body:
+            JSON.stringify({
+              name:name,
+              default_unit:'each'
+            })
+
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok ||
+       data.error){
+
+      throw new Error(
+        data.error ||
+        'Could not add product.'
+      );
+
+    }
+
+
+    input.value = '';
+
+
+    const found =
+      data.search &&
+      data.search.found
+        ? data.search.found.length
+        : 0;
+
+
+    msg.textContent =
+      `Added "${name}". Search completed: ${found} store price${found===1?'':'s'} found.`;
+
+    msg.className =
+      'success';
+
+
+    await load();
+
+
+    const newProduct =
+      products.find(
+        p =>
+          String(p.id) ===
+          String(data.product.id)
+      );
+
+
+    if(newProduct){
+
+      selected.add(
+        newProduct.id
+      );
+
+      renderProducts();
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      'Add product error:',
+      error
+    );
+
+    msg.textContent =
+      'Could not add product: ' +
+      (error.message || error);
+
+    msg.className =
+      'error';
 
   }
 
@@ -1137,75 +1045,69 @@ function toggleProduct(id){
 
 function clusters(){
 
-  const remaining =
-    [...stores];
-
-  const out = [];
+  const result = [];
+  const used = new Set();
 
 
-  while(remaining.length){
+  for(const store of stores){
 
-    const seed =
-      remaining.shift();
-
-    const cluster =
-      [seed];
+    if(used.has(store.id))
+      continue;
 
 
-    for(
-      let i=remaining.length-1;
-      i>=0;
-      i--
-    ){
+    const cluster = [store];
 
-      if(
-        hav(seed,remaining[i]) <=
-        CLUSTER_MILES
-      ){
+    used.add(store.id);
 
-        cluster.push(
-          remaining.splice(i,1)[0]
-        );
+
+    for(const other of stores){
+
+      if(used.has(other.id))
+        continue;
+
+
+      const distance =
+        hav(store,other);
+
+
+      if(distance <= CLUSTER_MILES){
+
+        cluster.push(other);
+        used.add(other.id);
 
       }
 
     }
 
 
-    out.push(cluster);
+    result.push(cluster);
 
   }
 
 
-  return out;
+  return result;
 
 }
 
 
 /* ============================================================
-   CALCULATE ROUTE
+   ROUTE
 ============================================================ */
 
 async function route(cluster){
 
   try{
 
-    const sessionResult =
+    const {
+      data:{
+        session
+      }
+    } =
       await db.auth.getSession();
 
-    const session =
-      sessionResult.data.session;
 
-
-    if(!session){
-
-      console.error(
-        'No active Supabase session.'
-      );
-
+    if(!session)
       return null;
-
-    }
 
 
     const response =
@@ -1224,54 +1126,36 @@ async function route(cluster){
               'application/json'
           },
 
-          body:JSON.stringify({
+          body:
+            JSON.stringify({
 
-            home:HOME,
+              home:HOME,
 
-            stores:
-              cluster.map(st => ({
-                id:String(st.id),
+              stores:
+                cluster.map(
+                  s => ({
+                    id:Number(s.id),
 
-                latitude:
-                  Number(st.latitude),
+                    latitude:
+                      Number(s.latitude),
 
-                longitude:
-                  Number(st.longitude)
+                    longitude:
+                      Number(s.longitude)
+                  })
+                )
 
-              }))
-
-          })
+            })
 
         }
       );
 
 
-    if(!response.ok){
-
-      console.error(
-        'Route function returned:',
-        response.status
-      );
-
+    if(!response.ok)
       return null;
-
-    }
 
 
     const j =
       await response.json();
-
-
-    if(!j.ok){
-
-      console.error(
-        'Route calculation failed:',
-        j
-      );
-
-      return null;
-
-    }
 
 
     return {
@@ -1279,7 +1163,7 @@ async function route(cluster){
       miles:
         Number(j.miles),
 
-      minutes:
+      duration_minutes:
         Number(j.duration_minutes),
 
       store_ids:
@@ -1311,12 +1195,6 @@ async function route(cluster){
 
 function priceFor(pid,sid){
 
-  /*
-    Custom products will normally not have a database
-    store_products row until the price-maintenance
-    system adds one.
-  */
-
   return prices.find(
     x =>
       String(x.product_id) ===
@@ -1325,162 +1203,6 @@ function priceFor(pid,sid){
       String(x.store_id) ===
       String(sid)
   ) || null;
-
-}
-
-
-/* ============================================================
-   CHOOSE CHEAPEST PRODUCT PRICE
-============================================================ */
-
-function chooseProducts(
-  chosen,
-  cluster
-){
-
-  return chosen.map(product => {
-
-    const options =
-      cluster
-
-        .map(st => ({
-
-          st,
-
-          row:
-            priceFor(
-              product.id,
-              st.id
-            )
-
-        }))
-
-        .filter(
-          x =>
-            x.row &&
-            x.row.current_price != null
-        )
-
-        .sort(
-          (a,b) =>
-            Number(a.row.current_price) -
-            Number(b.row.current_price)
-        );
-
-
-    return {
-
-      product,
-
-      choice:
-        options[0] || null
-
-    };
-
-  });
-
-}
-
-
-/* ============================================================
-   RENDER PLAN DATA
-============================================================ */
-
-function renderPlan(
-  name,
-  items,
-  rt
-){
-
-  const known =
-    items.filter(
-      x => x.choice
-    );
-
-  const missing =
-    items.filter(
-      x => !x.choice
-    );
-
-
-  const food =
-    known.reduce(
-      (a,x) =>
-        a +
-        Number(
-          x.choice.row.current_price
-        ),
-      0
-    );
-
-
-  const gas =
-    rt &&
-    fuel != null
-
-      ? (
-          rt.miles / MPG
-        ) *
-        Math.max(
-          0,
-          fuel - 0.10
-        )
-
-      : null;
-
-
-  const total =
-    gas == null
-      ? null
-      : food + gas;
-
-
-  const byStore = {};
-
-
-  known.forEach(x => {
-
-    const storeName =
-      x.choice.st.name;
-
-
-    if(!byStore[storeName]){
-
-      byStore[storeName] = [];
-
-    }
-
-
-    byStore[storeName].push(x);
-
-  });
-
-
-  return {
-
-    name,
-
-    items,
-
-    known,
-
-    missing,
-
-    food,
-
-    gas,
-
-    total,
-
-    rt,
-
-    byStore,
-
-    complete:
-      missing.length === 0 &&
-      !!rt
-
-  };
 
 }
 
@@ -1508,14 +1230,6 @@ async function optimize(){
   }
 
 
-  results.innerHTML =
-    '<p>Calculating product prices, nearby-store groups, routes and gas...</p>';
-
-
-  msg.textContent =
-    'Building your shopping plan...';
-
-
   const chosen =
     products.filter(
       p =>
@@ -1533,276 +1247,418 @@ async function optimize(){
   }
 
 
-  const plans = [];
+  results.innerHTML =
+    '<p>Searching the SmartBasket price database and calculating the best multi-store plan...</p>';
+
+  msg.textContent =
+    'Building your shopping plan...';
 
 
-  /*
-    Evaluate every nearby store cluster.
-  */
+  try{
 
-  for(
-    const cluster of clusters()
-  ){
+    const {
+      data:{
+        session
+      }
+    } =
+      await db.auth.getSession();
 
-    const items =
-      chooseProducts(
-        chosen,
-        cluster
+
+    if(!session){
+
+      msg.textContent =
+        'Your session expired. Please sign in again.';
+
+      return;
+
+    }
+
+
+    if(fuel == null){
+
+      await load();
+
+    }
+
+
+    if(fuel == null || fuel <= 0){
+
+      throw new Error(
+        "BJ's Stoughton gas price is not available yet. Refresh prices and try again."
       );
 
-
-    const rt =
-      await route(cluster);
+    }
 
 
-    plans.push(
-      renderPlan(
-        cluster
-          .map(x => x.name)
-          .join(' + '),
-
-        items,
-
-        rt
-      )
-    );
-
-  }
+    const routeDefs = [];
 
 
-  /*
-    Sort complete plans first,
-    then by total cost.
-  */
+    /*
+      Build routes for every individual store
+      and every nearby store cluster.
+    */
 
-  plans.sort(
-    (a,b) => {
+    for(const cluster of clusters()){
 
-      if(
-        a.complete !==
-        b.complete
-      ){
+      /*
+        Individual stores
+      */
 
-        return a.complete
-          ? -1
-          : 1;
+      for(const store of cluster){
+
+        const rt =
+          await route([store]);
+
+
+        if(rt){
+
+          routeDefs.push({
+
+            name:
+              store.name,
+
+            store_ids:[
+              Number(store.id)
+            ],
+
+            distance_miles:
+              Number(rt.miles)
+
+          });
+
+        }
 
       }
 
 
-      return (
-        a.total ?? Infinity
-      ) -
-      (
-        b.total ?? Infinity
+      /*
+        Nearby cluster
+      */
+
+      if(cluster.length > 1){
+
+        const rt =
+          await route(cluster);
+
+
+        if(rt){
+
+          routeDefs.push({
+
+            name:
+              cluster
+                .map(x => x.name)
+                .join(' + '),
+
+            store_ids:
+              cluster.map(
+                x => Number(x.id)
+              ),
+
+            distance_miles:
+              Number(rt.miles)
+
+          });
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      Always include Price Rite
+      as the user's baseline.
+    */
+
+    const priceRite =
+      stores.find(
+        x =>
+          Number(x.id) === 1
+      );
+
+
+    if(
+      priceRite &&
+      !routeDefs.some(
+        r =>
+          r.store_ids.length === 1 &&
+          r.store_ids[0] === 1
+      )
+    ){
+
+      const rt =
+        await route([
+          priceRite
+        ]);
+
+
+      if(rt){
+
+        routeDefs.push({
+
+          name:
+            priceRite.name,
+
+          store_ids:[1],
+
+          distance_miles:
+            Number(rt.miles)
+
+        });
+
+      }
+
+    }
+
+
+    if(!routeDefs.length){
+
+      throw new Error(
+        'No routes could be calculated.'
       );
 
     }
-  );
 
 
-  const winner =
-    plans.find(
-      x => x.complete
-    );
+    /*
+      Send the actual shopping request
+      to the backend optimizer.
+    */
+
+    const response =
+      await fetch(
+
+        SUPABASE_URL +
+        '/functions/v1/optimize-shopping-trip',
+
+        {
+
+          method:'POST',
+
+          headers:{
+
+            Authorization:
+              'Bearer ' +
+              session.access_token,
+
+            'Content-Type':
+              'application/json'
+
+          },
+
+          body:
+            JSON.stringify({
+
+              items:
+
+                chosen.map(
+                  p => ({
+
+                    product_id:
+                      Number(p.id),
+
+                    quantity:1,
+
+                    unit:
+                      p.default_unit ||
+                      'each'
+
+                  })
+                ),
 
 
-  let html = '';
+              stores:
+
+                stores.map(
+                  s => ({
+
+                    store_id:
+                      Number(s.id),
+
+                    distance_miles:0
+
+                  })
+                ),
 
 
-  /* ==========================================================
-     WINNER
-  ========================================================== */
-
-  if(winner){
-
-    html += `
-
-      <div class="winner store">
-
-        <h3>
-          Lowest Complete Plan
-        </h3>
-
-        <b>
-          ${esc(winner.name)}
-        </b>
-
-        <p>
-          Groceries:
-          <b>${money(winner.food)}</b>
-          +
-          Gas:
-          <b>${money(winner.gas)}</b>
-          =
-          <b>${money(winner.total)}</b>
-        </p>
-
-        <p>
-          Round trip:
-          ${winner.rt.miles.toFixed(1)}
-          miles
-          (${winner.rt.minutes.toFixed(0)}
-          min)
-        </p>
-
-      </div>
-
-    `;
-
-  }else{
-
-    html += `
-
-      <div class="store">
-
-        <b>
-          No complete plan has a verified route yet.
-        </b>
-
-        <p class="muted">
-          Partial plans are still shown below.
-          Products without tracked prices are listed
-          as missing instead of being ignored.
-        </p>
-
-      </div>
-
-    `;
-
-  }
+              routes:
+                routeDefs,
 
 
-  /* ==========================================================
-     ALL PLANS
-  ========================================================== */
+              gas_price_per_gallon:
 
-  html += plans.map(
-    (p,i) => {
+                Math.max(
+                  0,
+                  Number(fuel) - 0.10
+                ),
 
-      return `
 
-        <div class="store ${winner === p ? 'winner' : ''}">
+              mpg:
+                MPG
+
+            })
+
+        }
+
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(
+      !response.ok ||
+      data.error
+    ){
+
+      throw new Error(
+        data.error ||
+        'Shopping optimizer failed.'
+      );
+
+    }
+
+
+    const routes =
+      data.routes || [];
+
+
+    const complete =
+      routes
+        .filter(
+          r =>
+            r.complete
+        )
+        .sort(
+          (a,b) =>
+            Number(a.true_total_cost) -
+            Number(b.true_total_cost)
+        );
+
+
+    const priceRiteRoute =
+      complete.find(
+        r =>
+          r.store_ids.length === 1 &&
+          Number(r.store_ids[0]) === 1
+      );
+
+
+    const cheapest =
+      complete[0] || null;
+
+
+    /*
+      Apply the user's $5 rule.
+    */
+
+    let winner =
+      cheapest;
+
+    let ruleMessage =
+      '';
+
+
+    if(
+      priceRiteRoute &&
+      cheapest &&
+      cheapest !== priceRiteRoute
+    ){
+
+      const savings =
+        Number(
+          priceRiteRoute.true_total_cost
+        ) -
+        Number(
+          cheapest.true_total_cost
+        );
+
+
+      if(savings <= 5){
+
+        winner =
+          priceRiteRoute;
+
+
+        ruleMessage =
+          `The alternative plan saves ${money(Math.max(0,savings))} versus Price Rite, so it does not pass the $5 savings rule.`;
+
+      }else{
+
+        ruleMessage =
+          `The selected alternative saves ${money(savings)} versus Price Rite, so it passes the $5 savings rule.`;
+
+      }
+
+    }else if(
+      priceRiteRoute &&
+      !cheapest
+    ){
+
+      winner =
+        priceRiteRoute;
+
+    }
+
+
+    let html = '';
+
+
+    if(winner){
+
+      html += `
+
+        <div class="winner store">
 
           <h3>
-
-            ${esc(p.name)}
-
-            ${
-              p.complete
-
-                ? '<span class="pill">COMPLETE</span>'
-
-                : '<span class="pill">PARTIAL</span>'
-            }
-
+            Best Shopping Plan
           </h3>
 
+          <b>
+            ${esc(
+              winner.name ||
+              winner.store_ids.join(' + ')
+            )}
+          </b>
 
           <p>
-
-            Known grocery total:
-
+            Groceries:
             <b>
-              ${money(p.food)}
+              ${money(winner.food_cost)}
             </b>
 
-            ${
-              p.rt
+            +
 
-                ? `
+            Gas:
+            <b>
+              ${money(winner.fuel_cost)}
+            </b>
 
-                  · Round trip:
-                  ${p.rt.miles.toFixed(1)} mi
+            =
 
-                  · Gas:
-                  ${money(p.gas)}
-
-                  · Known trip total:
-                  <b>${money(p.total)}</b>
-
-                `
-
-                : ' · Route: —'
-            }
-
+            <b>
+              ${money(winner.true_total_cost)}
+            </b>
           </p>
 
-
-          <h4>
-            What to buy where
-          </h4>
-
-
-          ${
-            Object.entries(
-              p.byStore
-            )
-            .map(
-              ([storeName,arr]) => `
-
-                <p>
-
-                  <b>
-                    ${esc(storeName)}
-                  </b>
-
-                  <br>
-
-                  ${
-                    arr
-                      .map(
-                        x => `
-
-                          ${esc(x.product.name)}
-
-                          —
-                          ${money(
-                            x.choice.row.current_price
-                          )}
-
-                        `
-                      )
-                      .join('<br>')
-                  }
-
-                </p>
-
-              `
-            )
-            .join('')
-          }
-
+          <p>
+            Round trip:
+            ${Number(
+              winner.distance_miles
+            ).toFixed(1)}
+            miles
+          </p>
 
           ${
-            p.missing.length
-
+            ruleMessage
               ? `
-
-                <h4 class="missing">
-                  Prices not found
-                </h4>
-
-                ${
-                  p.missing
-                    .map(
-                      x => `
-
-                        <div class="missing">
-
-                          ${esc(
-                            x.product.name
-                          )}
-
-                        </div>
-
-                      `
-                    )
-                    .join('')
-                }
-
+                <p class="muted">
+                  ${esc(ruleMessage)}
+                </p>
               `
-
               : ''
           }
 
@@ -1810,16 +1666,274 @@ async function optimize(){
 
       `;
 
+    }else{
+
+      html += `
+
+        <div class="store">
+
+          <b class="error">
+            No complete plan is available
+            with the prices currently in
+            the database.
+          </b>
+
+          <p class="muted">
+            SmartBasket still shows partial
+            routes and every missing product
+            below.
+          </p>
+
+        </div>
+
+      `;
+
     }
-  ).join('');
 
 
-  results.innerHTML =
-    html;
+    /*
+      Show every route.
+    */
+
+    html +=
+
+      routes.map(
+        (r,i) => {
+
+          const selectedRoute =
+            winner &&
+            r.store_ids.join(',') ===
+            winner.store_ids.join(',');
 
 
-  msg.textContent =
-    `Checked ${chosen.length} selected products across ${stores.length} stores.`;
+          const missing =
+            r.missing_items || [];
+
+
+          const selections =
+            r.selections || [];
+
+
+          const grouped = {};
+
+
+          selections.forEach(
+            x => {
+
+              const store =
+                stores.find(
+                  s =>
+                    Number(s.id) ===
+                    Number(x.store_id)
+                );
+
+
+              const name =
+                store
+                  ? store.name
+                  : 'Store ' + x.store_id;
+
+
+              if(!grouped[name])
+                grouped[name] = [];
+
+
+              const product =
+                chosen.find(
+                  p =>
+                    Number(p.id) ===
+                    Number(x.product_id)
+                );
+
+
+              grouped[name].push(
+
+                `${esc(
+                  product?.name ||
+                  ('Product ' + x.product_id)
+                )} — ${money(
+                  x.extended_price
+                )}`
+
+              );
+
+            }
+          );
+
+
+          return `
+
+            <div class="store ${
+              selectedRoute
+                ? 'winner'
+                : ''
+            }">
+
+              <h3>
+
+                ${esc(
+                  r.name ||
+                  r.store_ids.join(' + ')
+                )}
+
+                ${
+                  r.complete
+
+                    ? '<span class="pill">COMPLETE</span>'
+
+                    : '<span class="pill">PARTIAL</span>'
+                }
+
+              </h3>
+
+
+              <p>
+
+                Known groceries:
+                <b>
+                  ${money(r.food_cost)}
+                </b>
+
+                ·
+
+                Gas:
+                <b>
+                  ${money(r.fuel_cost)}
+                </b>
+
+                ·
+
+                Trip total:
+                <b>
+                  ${money(r.true_total_cost)}
+                </b>
+
+                ·
+
+                ${Number(
+                  r.distance_miles
+                ).toFixed(1)}
+                mi
+
+              </p>
+
+
+              <h4>
+                What to buy where
+              </h4>
+
+
+              ${
+                Object.entries(grouped)
+                  .map(
+                    ([storeName,arr]) =>
+                      `
+                        <p>
+                          <b>
+                            ${esc(storeName)}
+                          </b>
+                          <br>
+                          ${arr.join('<br>')}
+                        </p>
+                      `
+                  )
+                  .join('')
+              }
+
+
+              ${
+                missing.length
+
+                  ? `
+
+                    <h4 class="missing">
+                      Prices not found
+                    </h4>
+
+                    ${
+                      missing
+                        .map(
+                          m => {
+
+                            const p =
+                              chosen.find(
+                                x =>
+                                  Number(x.id) ===
+                                  Number(m.product_id)
+                              );
+
+                            return `
+
+                              <div class="missing">
+
+                                ${esc(
+                                  p?.name ||
+                                  ('Product ' +
+                                   m.product_id)
+                                )}
+
+                              </div>
+
+                            `;
+
+                          }
+                        )
+                        .join('')
+                    }
+
+                  `
+
+                  : ''
+              }
+
+            </div>
+
+          `;
+
+        }
+      ).join('');
+
+
+    results.innerHTML =
+      html;
+
+
+    msg.textContent =
+      `Checked ${chosen.length} selected products across ${stores.length} stores. Prices in this result come from the SmartBasket database.`;
+
+
+  }catch(error){
+
+    console.error(
+      error
+    );
+
+
+    results.innerHTML = `
+
+      <div class="store">
+
+        <b class="error">
+          Could not calculate
+          the shopping plan.
+        </b>
+
+        <p class="muted">
+          ${esc(
+            error.message ||
+            String(error)
+          )}
+        </p>
+
+      </div>
+
+    `;
+
+
+    msg.textContent =
+      'Shopping plan error.';
+
+  }
 
 }
 
@@ -1844,7 +1958,10 @@ db.auth.getSession()
       }
 
 
-      if(data && data.session){
+      if(
+        data &&
+        data.session
+      ){
 
         await start();
 
@@ -1876,9 +1993,9 @@ db.auth.onAuthStateChange(
     ){
 
       if(
-        el('app').classList.contains(
-          'hidden'
-        )
+        el('app')
+          .classList
+          .contains('hidden')
       ){
 
         await start();
@@ -1893,10 +2010,12 @@ db.auth.onAuthStateChange(
     ){
 
       el('app')
-        .classList.add('hidden');
+        .classList
+        .add('hidden');
 
       el('login')
-        .classList.remove('hidden');
+        .classList
+        .remove('hidden');
 
     }
 
