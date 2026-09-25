@@ -1,14 +1,37 @@
 <!doctype html>
 <html lang="en">
+
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1">
+
 <title>SmartBasket AI</title>
 
+
 <style>
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;background:#f5f7fb;color:#172033}
-header{background:#101827;color:#fff;padding:18px}
-main{max-width:1100px;margin:20px auto;padding:0 14px}
+
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  margin:0;
+  background:#f5f7fb;
+  color:#172033
+}
+
+header{
+  background:#101827;
+  color:#fff;
+  padding:18px
+}
+
+main{
+  max-width:1100px;
+  margin:20px auto;
+  padding:0 14px
+}
 
 .card{
   background:#fff;
@@ -50,7 +73,7 @@ textarea{
   width:100%;
   box-sizing:border-box;
   margin:5px 0 10px;
-  min-height:100px;
+  min-height:70px;
   resize:vertical;
   font-family:inherit
 }
@@ -64,7 +87,8 @@ textarea{
 .product{
   border:1px solid #e1e6ee;
   border-radius:10px;
-  padding:10px
+  padding:10px;
+  background:#fff
 }
 
 .store{
@@ -116,44 +140,76 @@ textarea{
   margin:2px
 }
 
-.extra-search{
-  margin-top:15px;
-  padding:15px;
-  border:1px solid #e1e6ee;
-  border-radius:12px;
-  background:#fafbfd
+.add-product-area{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid #e1e6ee
 }
 
-.extra-item{
+.add-product-row{
+  display:flex;
+  gap:8px;
+  align-items:center
+}
+
+.add-product-row input{
+  margin:0;
+  flex:1
+}
+
+.custom-product{
+  border:2px solid #1769e0;
+  background:#f8fbff
+}
+
+.custom-label{
   display:inline-block;
-  background:#eef3fa;
-  padding:6px 10px;
-  border-radius:20px;
-  font-size:13px;
-  margin:4px
+  background:#e9f1ff;
+  color:#1769e0;
+  padding:3px 7px;
+  border-radius:12px;
+  font-size:11px;
+  font-weight:700;
+  margin-left:5px
 }
 
-.remove-item{
-  background:none;
-  color:#697586;
-  padding:0;
-  margin:0 0 0 5px;
-  font-weight:700
+@media(max-width:600px){
+
+  .add-product-row{
+    display:block
+  }
+
+  .add-product-row button{
+    margin-top:8px
+  }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <header>
+
 <b>🛒 SmartBasket AI</b>
+
 </header>
+
 
 <main>
 
-<!-- LOGIN -->
 
-<div id="login" class="card">
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div
+  id="login"
+  class="card">
 
 <h2>Sign in</h2>
 
@@ -161,196 +217,231 @@ textarea{
 Sign in to use your SmartBasket database.
 </p>
 
-<input
-id="email"
-type="email"
-placeholder="Email">
 
 <input
-id="password"
-type="password"
-placeholder="Password">
+  id="email"
+  type="email"
+  placeholder="Email">
 
-<button onclick="signin()">
-Sign in
-</button>
+
+<input
+  id="password"
+  type="password"
+  placeholder="Password">
+
 
 <button
-class="secondary"
-onclick="signup()">
-Create account
+  onclick="signin()">
+
+Sign in
+
 </button>
+
+
+<button
+  class="secondary"
+  onclick="signup()">
+
+Create account
+
+</button>
+
 
 <p id="authmsg"></p>
 
 </div>
 
 
-<!-- APPLICATION -->
 
-<div id="app" class="hidden">
+<!-- =========================
+     APPLICATION
+========================= -->
+
+<div
+  id="app"
+  class="hidden">
+
 
 <div class="card">
 
+
 <h2>Your Shopping List</h2>
 
+
 <p class="muted">
-SmartBasket compares every tracked price. Missing prices are shown instead of removing the product from the calculation.
+
+SmartBasket compares every tracked price.
+Missing prices are shown instead of removing the product from the calculation.
+
 </p>
 
 
-<!-- NORMAL PRODUCTS -->
+
+<!-- =========================
+     PRODUCT LIST
+========================= -->
 
 <div
-id="products"
-class="products">
+  id="products"
+  class="products">
 </div>
 
 
-<br>
+
+<!-- =========================
+     ADD PRODUCT
+========================= -->
+
+<div class="add-product-area">
 
 
-<!-- SEARCH MORE PRODUCTS BUTTON -->
+<h3 style="margin-top:0">
 
-<button
-onclick="toggleExtraSearch()">
+Add Product to Shopping List
 
-🔎 Search More Products
-
-</button>
-
-
-<!-- SEARCH MORE PRODUCTS BOX -->
-
-<div
-id="extraSearch"
-class="extra-search hidden">
-
-<h3>
-Search for additional products
 </h3>
 
+
 <p class="muted">
-Enter products, brands, package sizes, or anything else you want SmartBasket to search for.
-Enter one item per line.
+
+If the product is not already listed, type it below.
+It will be added to your shopping list and selected automatically.
+
 </p>
 
-<textarea
-id="extraProducts"
-placeholder="Example:
-Bananas
-2% milk
-Coca-Cola 12 pack
-30 count eggs
-Chicken wings
-Anything on sale">
-</textarea>
 
-<br>
+<div class="add-product-row">
+
+
+<input
+  id="newProduct"
+  type="text"
+  placeholder="Example: Bananas">
+
 
 <button
-onclick="saveExtraSearch()">
+  onclick="addProduct()">
 
-Add to Search
-
-</button>
-
-<button
-class="secondary"
-onclick="clearExtraSearch()">
-
-Clear
+➕ Add Product
 
 </button>
 
 
-<div
-id="extraSearchList"
-style="margin-top:12px">
 </div>
 
+
 </div>
+
 
 
 <br>
 
 
-<!-- MAIN BUTTONS -->
+
+<!-- =========================
+     MAIN BUTTONS
+========================= -->
 
 <button
-onclick="optimize()">
+  onclick="optimize()">
 
 Find Best Shopping Plan
 
 </button>
 
+
 <button
-class="secondary"
-onclick="load()">
+  class="secondary"
+  onclick="load()">
 
 Refresh Prices
 
 </button>
 
+
 <p
-id="msg"
-class="muted">
+  id="msg"
+  class="muted">
 </p>
+
 
 </div>
 
 
-<!-- RESULTS -->
+
+<!-- =========================
+     RESULTS
+========================= -->
 
 <div class="card">
 
-<h2>
-Results
-</h2>
+
+<h2>Results</h2>
+
 
 <div id="results">
 
 <p class="muted">
+
 Select products and tap Find Best Shopping Plan.
+
 </p>
 
 </div>
 
+
 </div>
 
 
-<!-- TRIP SETTINGS -->
+
+<!-- =========================
+     TRIP SETTINGS
+========================= -->
 
 <div class="card">
 
-<h3>
-Trip settings
-</h3>
+
+<h3>Trip settings</h3>
+
 
 <p>
+
 <b>Home:</b>
 513 Canton Street, Stoughton, MA 02072
+
 </p>
+
 
 <p>
+
 <b>Vehicle:</b>
 25 MPG
+
 </p>
+
 
 <p class="muted">
+
 Gas uses the latest BJ's Stoughton regular price minus the $0.10/gal member discount.
+
 </p>
 
-</div>
 
 </div>
+
+
+</div>
+
 
 </main>
 
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
 <script>
+
 
 /* =========================================
    SUPABASE
@@ -359,8 +450,10 @@ Gas uses the latest BJ's Stoughton regular price minus the $0.10/gal member disc
 const URL =
 'https://rwxsatmzflryqlgpvbzx.supabase.co';
 
+
 const KEY =
 'sb_publishable_Zkk1oLjNQaeNqhlTWizYvA_llZiGWXn';
+
 
 const db =
 supabase.createClient(
@@ -375,6 +468,7 @@ supabase.createClient(
 );
 
 
+
 /* =========================================
    SETTINGS
 ========================================= */
@@ -384,9 +478,12 @@ const HOME = {
   lon:-71.1216529
 };
 
+
 const MPG = 25;
 
+
 const CLUSTER_MILES = 0.5;
+
 
 
 /* =========================================
@@ -402,6 +499,7 @@ let prices = [];
 let selected = new Set();
 
 let fuel = null;
+
 
 
 /* =========================================
@@ -448,103 +546,37 @@ const hav = (a,b) => {
   return (
     2 *
     R *
-    Math.asin(Math.sqrt(x))
+    Math.asin(
+      Math.sqrt(x)
+    )
   );
 
 };
 
 
-/* =========================================
-   LOGIN
-========================================= */
-
-async function signin(){
-
-  const {error} =
-    await db.auth.signInWithPassword({
-
-      email:
-        document.getElementById('email').value,
-
-      password:
-        document.getElementById('password').value
-
-    });
-
-
-  document.getElementById(
-    'authmsg'
-  ).textContent =
-    error ? error.message : '';
-
-
-  if(!error){
-
-    await start();
-
-  }
-
-}
-
-
-async function signup(){
-
-  const {error} =
-    await db.auth.signUp({
-
-      email:
-        document.getElementById('email').value,
-
-      password:
-        document.getElementById('password').value
-
-    });
-
-
-  document.getElementById(
-    'authmsg'
-  ).textContent =
-
-    error
-      ? error.message
-      : 'Account created. Check your email if confirmation is required.';
-
-}
-
 
 /* =========================================
-   START APP
+   CUSTOM PRODUCTS
 ========================================= */
 
-async function start(){
+/*
+  These are products added from the website.
 
-  document
-    .getElementById('login')
-    .classList.add('hidden');
+  They are stored in this browser so they
+  remain on the shopping list after refresh.
 
-  document
-    .getElementById('app')
-    .classList.remove('hidden');
+  They are NOT put into Supabase yet.
+  If there is no database price, the optimizer
+  will show them as "Prices not found".
+*/
 
-
-  loadExtraSearch();
-
-  await load();
-
-}
-
-
-/* =========================================
-   ADDITIONAL PRODUCT SEARCH
-========================================= */
-
-function getExtraSearch(){
+function getCustomProducts(){
 
   try{
 
     const saved =
       localStorage.getItem(
-        'smartbasket_extra_search'
+        'smartbasket_custom_products'
       );
 
 
@@ -559,6 +591,8 @@ function getExtraSearch(){
 
   }catch(e){
 
+    console.error(e);
+
     return [];
 
   }
@@ -566,51 +600,38 @@ function getExtraSearch(){
 }
 
 
-/* Open / close the search box */
 
-function toggleExtraSearch(){
+function saveCustomProducts(items){
 
-  const box =
-    document.getElementById(
-      'extraSearch'
-    );
-
-
-  box.classList.toggle('hidden');
-
-
-  renderExtraSearch();
+  localStorage.setItem(
+    'smartbasket_custom_products',
+    JSON.stringify(items)
+  );
 
 }
 
 
-/* Load saved additional products */
 
-function loadExtraSearch(){
+/* =========================================
+   ADD PRODUCT
+========================================= */
 
-  renderExtraSearch();
-
-}
-
-
-/* Add products */
-
-function saveExtraSearch(){
+function addProduct(){
 
   const input =
     document.getElementById(
-      'extraProducts'
+      'newProduct'
     );
 
 
-  const text =
+  const name =
     input.value.trim();
 
 
-  if(!text){
+  if(!name){
 
     alert(
-      'Please enter at least one product.'
+      'Please enter a product name.'
     );
 
     return;
@@ -618,75 +639,219 @@ function saveExtraSearch(){
   }
 
 
-  const newItems =
-    text
-      .split(/\n|,/)
-      .map(
-        x => x.trim()
-      )
-      .filter(Boolean);
+
+  /*
+    First check the products already
+    loaded from Supabase.
+  */
+
+  const existingDatabaseProduct =
+    products.find(
+      p =>
+        String(p.name)
+          .trim()
+          .toLowerCase() ===
+        name.toLowerCase()
+    );
 
 
-  const existing =
-    getExtraSearch();
+  if(existingDatabaseProduct){
+
+    /*
+      Already exists in the normal
+      shopping list.
+
+      Just select it.
+    */
+
+    selected.add(
+      existingDatabaseProduct.id
+    );
 
 
-  const combined =
-    [
-      ...existing,
-      ...newItems
-    ];
+    renderProducts();
 
 
-  const unique = [];
+    input.value = '';
 
 
-  combined.forEach(item => {
+    document.getElementById(
+      'msg'
+    ).textContent =
+      `${existingDatabaseProduct.name} is already on your shopping list and has been selected.`;
 
-    const exists =
-      unique.some(
-        x =>
-          x.toLowerCase() ===
-          item.toLowerCase()
-      );
+    return;
 
-
-    if(!exists){
-
-      unique.push(item);
-
-    }
-
-  });
+  }
 
 
-  localStorage.setItem(
-    'smartbasket_extra_search',
-    JSON.stringify(unique)
+
+  /*
+    Check products that the user
+    previously added.
+  */
+
+  const custom =
+    getCustomProducts();
+
+
+  const existingCustom =
+    custom.find(
+      p =>
+        String(p.name)
+          .trim()
+          .toLowerCase() ===
+        name.toLowerCase()
+    );
+
+
+  if(existingCustom){
+
+    selected.add(
+      existingCustom.id
+    );
+
+
+    renderProducts();
+
+
+    input.value = '';
+
+
+    document.getElementById(
+      'msg'
+    ).textContent =
+      `${existingCustom.name} is already on your shopping list and has been selected.`;
+
+    return;
+
+  }
+
+
+
+  /*
+    Create a unique ID for the
+    new shopping-list product.
+  */
+
+  const newProduct = {
+
+    id:
+      'custom_' +
+      Date.now() +
+      '_' +
+      Math.random()
+        .toString(36)
+        .substring(2,8),
+
+    name:name,
+
+    category:
+      'Added product',
+
+    is_custom:true
+
+  };
+
+
+
+  custom.push(
+    newProduct
   );
+
+
+  saveCustomProducts(
+    custom
+  );
+
+
+  /*
+    Add it to the current product
+    array so the optimizer sees it.
+  */
+
+  products.push(
+    newProduct
+  );
+
+
+  /*
+    Automatically select it.
+  */
+
+  selected.add(
+    newProduct.id
+  );
+
+
+  /*
+    Refresh the product list.
+  */
+
+  renderProducts();
 
 
   input.value = '';
 
 
-  renderExtraSearch();
-
-
   document.getElementById(
     'msg'
   ).textContent =
-    `${unique.length} additional product(s) added to search.`;
+    `${name} was added to your shopping list and selected.`;
 
 }
 
 
-/* Display products */
 
-function renderExtraSearch(){
+/* =========================================
+   ENTER KEY = ADD PRODUCT
+========================================= */
+
+document.addEventListener(
+  'DOMContentLoaded',
+  () => {
+
+    const input =
+      document.getElementById(
+        'newProduct'
+      );
+
+
+    if(input){
+
+      input.addEventListener(
+        'keydown',
+        event => {
+
+          if(
+            event.key === 'Enter'
+          ){
+
+            event.preventDefault();
+
+            addProduct();
+
+          }
+
+        }
+      );
+
+    }
+
+  }
+);
+
+
+
+/* =========================================
+   RENDER PRODUCTS
+========================================= */
+
+function renderProducts(){
 
   const box =
     document.getElementById(
-      'extraSearchList'
+      'products'
     );
 
 
@@ -697,101 +862,163 @@ function renderExtraSearch(){
   }
 
 
-  const items =
-    getExtraSearch();
-
-
-  if(!items.length){
-
-    box.innerHTML =
-      '<span class="muted">No additional products added yet.</span>';
-
-    return;
-
-  }
-
-
   box.innerHTML =
-    '<p><b>Additional products to search:</b></p>' +
+    products
+      .map(
+        x => {
 
-    items.map(
-      (item,index) =>
-
-      `<span class="extra-item">
-
-        ${esc(item)}
-
-        <button
-          class="remove-item"
-          onclick="removeExtraSearch(${index})">
-
-          ×
-
-        </button>
-
-      </span>`
-
-    ).join('');
-
-}
+          const custom =
+            x.is_custom === true;
 
 
-/* Remove one */
+          return `
 
-function removeExtraSearch(index){
+<label
+  class="product ${custom ? 'custom-product' : ''}">
 
-  const items =
-    getExtraSearch();
+<input
+  type="checkbox"
 
-
-  items.splice(
-    index,
-    1
-  );
-
-
-  localStorage.setItem(
-    'smartbasket_extra_search',
-    JSON.stringify(items)
-  );
-
-
-  renderExtraSearch();
-
-}
-
-
-/* Remove all */
-
-function clearExtraSearch(){
-
-  localStorage.removeItem(
-    'smartbasket_extra_search'
-  );
-
-
-  const input =
-    document.getElementById(
-      'extraProducts'
-    );
-
-
-  if(input){
-
-    input.value = '';
-
+  ${
+    selected.has(x.id)
+      ? 'checked'
+      : ''
   }
 
+  onchange="toggleProduct('${String(x.id).replace(/'/g,"\\'")}')">
 
-  renderExtraSearch();
+<b>
+${esc(x.name)}
+</b>
+
+${
+  custom
+    ? '<span class="custom-label">ADDED</span>'
+    : ''
+}
+
+<br>
+
+<span class="muted">
+${esc(x.category || '')}
+</span>
+
+</label>
+
+`;
+
+        }
+      )
+      .join('');
+
+}
+
+
+
+/* =========================================
+   LOGIN
+========================================= */
+
+async function signin(){
+
+  const emailValue =
+    document.getElementById(
+      'email'
+    ).value;
+
+
+  const passwordValue =
+    document.getElementById(
+      'password'
+    ).value;
+
+
+  const {error} =
+    await db.auth.signInWithPassword({
+
+      email:emailValue,
+
+      password:passwordValue
+
+    });
 
 
   document.getElementById(
-    'msg'
+    'authmsg'
   ).textContent =
-    'Additional search products cleared.';
+    error
+      ? error.message
+      : '';
+
+
+  if(!error){
+
+    await start();
+
+  }
 
 }
+
+
+
+async function signup(){
+
+  const emailValue =
+    document.getElementById(
+      'email'
+    ).value;
+
+
+  const passwordValue =
+    document.getElementById(
+      'password'
+    ).value;
+
+
+  const {error} =
+    await db.auth.signUp({
+
+      email:emailValue,
+
+      password:passwordValue
+
+    });
+
+
+  document.getElementById(
+    'authmsg'
+  ).textContent =
+
+    error
+
+      ? error.message
+
+      : 'Account created. Check your email if confirmation is required.';
+
+}
+
+
+
+/* =========================================
+   START
+========================================= */
+
+async function start(){
+
+  document
+    .getElementById('login')
+    .classList.add('hidden');
+
+
+  document
+    .getElementById('app')
+    .classList.remove('hidden');
+
+
+  await load();
+
+}
+
 
 
 /* =========================================
@@ -804,6 +1031,7 @@ async function load(){
     'msg'
   ).textContent =
     'Loading latest tracked prices...';
+
 
 
   const [
@@ -861,6 +1089,7 @@ async function load(){
   ]);
 
 
+
   if(
     p.error ||
     s.error ||
@@ -872,27 +1101,37 @@ async function load(){
     ).textContent =
       'Could not load SmartBasket data. Check Supabase permissions.';
 
+
     console.error(
       p.error,
       s.error,
       sp.error
     );
 
+
     return;
 
   }
 
 
+
+  /*
+    Load normal database products.
+  */
+
   products =
     p.data || [];
+
 
 
   stores =
     s.data || [];
 
 
+
   prices =
     sp.data || [];
+
 
 
   fuel =
@@ -903,37 +1142,47 @@ async function load(){
       : null;
 
 
-  document.getElementById(
-    'products'
-  ).innerHTML =
 
-    products
-      .map(
-        x =>
+  /*
+    Add the user's custom products
+    to the same shopping list.
+  */
 
-        `<label class="product">
+  const custom =
+    getCustomProducts();
 
-          <input
-            type="checkbox"
-            ${selected.has(x.id)
-              ? 'checked'
-              : ''}
-            onchange="toggle(${x.id})">
 
-          <b>
-            ${esc(x.name)}
-          </b>
 
-          <br>
+  custom.forEach(
+    customProduct => {
 
-          <span class="muted">
-            ${esc(x.category || '')}
-          </span>
+      const alreadyExists =
+        products.some(
+          p =>
+            String(p.name)
+              .trim()
+              .toLowerCase() ===
+            String(customProduct.name)
+              .trim()
+              .toLowerCase()
+        );
 
-        </label>`
 
-      )
-      .join('');
+      if(!alreadyExists){
+
+        products.push(
+          customProduct
+        );
+
+      }
+
+    }
+  );
+
+
+
+  renderProducts();
+
 
 
   document.getElementById(
@@ -945,11 +1194,12 @@ async function load(){
 }
 
 
+
 /* =========================================
    PRODUCT SELECTION
 ========================================= */
 
-function toggle(id){
+function toggleProduct(id){
 
   if(
     selected.has(id)
@@ -966,6 +1216,7 @@ function toggle(id){
 }
 
 
+
 /* =========================================
    STORE CLUSTERS
 ========================================= */
@@ -974,6 +1225,7 @@ function clusters(){
 
   const remaining =
     [...stores];
+
 
   const out = [];
 
@@ -1029,6 +1281,7 @@ function clusters(){
 }
 
 
+
 /* =========================================
    ROUTE
 ========================================= */
@@ -1052,10 +1305,13 @@ async function route(
     }
 
 
+
     const r =
       await fetch(
+
         URL +
         '/functions/v1/calculate-store-routes',
+
         {
 
           method:'POST',
@@ -1071,17 +1327,21 @@ async function route(
 
           },
 
+
           body:
             JSON.stringify({
 
               home:HOME,
+
 
               stores:
                 cluster.map(
                   st => ({
 
                     id:
-                      String(st.id),
+                      String(
+                        st.id
+                      ),
 
                     latitude:
                       Number(
@@ -1099,18 +1359,27 @@ async function route(
             })
 
         }
+
       );
 
 
+
     if(!r.ok){
+
+      console.error(
+        'Route request failed:',
+        r.status
+      );
 
       return null;
 
     }
 
 
+
     const j =
       await r.json();
+
 
 
     return j.ok
@@ -1118,7 +1387,9 @@ async function route(
       ? {
 
           miles:
-            Number(j.miles),
+            Number(
+              j.miles
+            ),
 
           minutes:
             Number(
@@ -1144,11 +1415,13 @@ async function route(
       e
     );
 
+
     return null;
 
   }
 
 }
+
 
 
 /* =========================================
@@ -1180,8 +1453,9 @@ function priceFor(
 }
 
 
+
 /* =========================================
-   CHOOSE CHEAPEST
+   CHOOSE CHEAPEST PRODUCT
 ========================================= */
 
 function chooseProducts(
@@ -1231,6 +1505,7 @@ function chooseProducts(
           );
 
 
+
       return {
 
         product:p,
@@ -1247,6 +1522,7 @@ function chooseProducts(
 }
 
 
+
 /* =========================================
    BUILD PLAN
 ========================================= */
@@ -1259,13 +1535,15 @@ function renderPlan(
 
   const known =
     items.filter(
-      x => x.choice
+      x =>
+        x.choice
     );
 
 
   const missing =
     items.filter(
-      x => !x.choice
+      x =>
+        !x.choice
     );
 
 
@@ -1280,6 +1558,7 @@ function renderPlan(
 
       0
     );
+
 
 
   const gas =
@@ -1306,13 +1585,16 @@ function renderPlan(
         null;
 
 
+
   const total =
     gas == null
       ? null
       : food + gas;
 
 
+
   const byStore = {};
+
 
 
   known.forEach(
@@ -1335,6 +1617,7 @@ function renderPlan(
 
     }
   );
+
 
 
   return {
@@ -1366,6 +1649,7 @@ function renderPlan(
 }
 
 
+
 /* =========================================
    OPTIMIZE
 ========================================= */
@@ -1381,15 +1665,18 @@ async function optimize(){
     ).textContent =
       'Select at least one product first.';
 
+
     return;
 
   }
+
 
 
   document.getElementById(
     'results'
   ).innerHTML =
     '<p>Calculating product prices, nearby-store groups, routes and gas...</p>';
+
 
 
   const chosen =
@@ -1401,7 +1688,9 @@ async function optimize(){
     );
 
 
+
   const plans = [];
+
 
 
   for(
@@ -1423,20 +1712,29 @@ async function optimize(){
 
     plans.push(
       renderPlan(
+
         cluster
           .map(
-            x => x.name
+            x =>
+              x.name
           )
           .join(' + '),
 
         items,
 
         rt
+
       )
     );
 
   }
 
+
+
+  /*
+    Complete plans first.
+    Then lowest total.
+  */
 
   plans.sort(
     (a,b) => {
@@ -1458,7 +1756,9 @@ async function optimize(){
         a.total ??
         Infinity
 
-      ) -
+      )
+
+      -
 
       (
 
@@ -1471,6 +1771,7 @@ async function optimize(){
   );
 
 
+
   const winner =
     plans.find(
       x =>
@@ -1478,7 +1779,10 @@ async function optimize(){
     );
 
 
+
   let html =
+
+
 
     winner
 
@@ -1493,6 +1797,7 @@ Lowest complete plan
 <b>
 ${esc(winner.name)}
 </b>
+
 
 <p>
 
@@ -1512,6 +1817,7 @@ ${money(winner.total)}
 
 </p>
 
+
 <p>
 
 Round trip:
@@ -1527,13 +1833,18 @@ min
 
 </div>`
 
+
+
       :
+
+
 
 `<div class="store">
 
 <b>
 No complete plan has a verified route yet.
 </b>
+
 
 <p class="muted">
 
@@ -1545,11 +1856,14 @@ Products without tracked prices are listed as missing instead of being ignored.
 </div>`;
 
 
+
   html +=
+
 
     plans
       .map(
         p =>
+
 
 `<div
 class="store
@@ -1557,19 +1871,31 @@ ${winner === p
   ? 'winner'
   : ''}">
 
+
 <h3>
 
 ${esc(p.name)}
 
+
 ${
-p.complete
+  p.complete
 
-? '<span class="pill">COMPLETE</span>'
+    ?
 
-: '<span class="pill">PARTIAL</span>'
+      '<span class="pill">
+        COMPLETE
+      </span>'
+
+    :
+
+      '<span class="pill">
+        PARTIAL
+      </span>'
 }
 
+
 </h3>
+
 
 
 <p>
@@ -1580,10 +1906,12 @@ Known grocery total:
 ${money(p.food)}
 </b>
 
-${
-p.rt
 
-?
+
+${
+  p.rt
+
+    ?
 
 `· Round trip:
 ${p.rt.miles.toFixed(1)}
@@ -1598,12 +1926,14 @@ ${money(p.gas)}
 ${money(p.total)}
 </b>`
 
-:
+    :
 
-' · Route: —'
+      ' · Route: —'
 }
 
+
 </p>
+
 
 
 <h4>
@@ -1611,12 +1941,14 @@ What to buy where
 </h4>
 
 
+
 ${
-Object.entries(
-  p.byStore
-)
-.map(
-  ([s,arr]) =>
+  Object.entries(
+    p.byStore
+  )
+  .map(
+    ([s,arr]) =>
+
 
 `<p>
 
@@ -1626,41 +1958,50 @@ ${esc(s)}
 
 <br>
 
-${
-arr
-.map(
-x =>
 
-`${esc(x.product.name)}
+${
+  arr
+    .map(
+      x =>
+
+`${esc(
+  x.product.name
+)}
+
 —
+
 ${money(
-x.choice.row.current_price
+  x.choice.row.current_price
 )}`
 
-)
-.join('<br>')
+    )
+    .join('<br>')
 }
 
 </p>`
 
-)
-.join('')
+
+  )
+  .join('')
 }
 
 
-${
-p.missing.length
 
-?
+${
+  p.missing.length
+
+    ?
 
 `<h4 class="missing">
 Prices not found
 </h4>
 
+
 ${
-p.missing
-.map(
-x =>
+  p.missing
+    .map(
+      x =>
+
 `<div class="missing">
 
 ${esc(
@@ -1668,20 +2009,22 @@ ${esc(
 )}
 
 </div>`
-)
-.join('')
+
+    )
+    .join('')
 }`
 
-:
+    :
 
-''
-
+      ''
 }
+
 
 </div>`
 
       )
       .join('');
+
 
 
   document.getElementById(
@@ -1692,25 +2035,27 @@ ${esc(
 }
 
 
+
 /* =========================================
-   START IF ALREADY LOGGED IN
+   AUTO LOGIN
 ========================================= */
 
 db.auth
-.getSession()
-.then(
-  ({data}) => {
+  .getSession()
+  .then(
+    ({data}) => {
 
-    if(
-      data.session
-    ){
+      if(
+        data.session
+      ){
 
-      start();
+        start();
+
+      }
 
     }
+  );
 
-  }
-);
 
 
 /* =========================================
@@ -1718,13 +2063,17 @@ db.auth
 ========================================= */
 
 db.auth.onAuthStateChange(
-  (event,session) => {
+  (
+    event,
+    session
+  ) => {
 
     if(session){
 
       document
         .getElementById('login')
         .classList.add('hidden');
+
 
       document
         .getElementById('app')
